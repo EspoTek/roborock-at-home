@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Roborock at Home</title>
+<meta name="theme-color" content="#f2f0eb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111413" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{color-scheme:light dark;--bg:#f2f0eb;--map:#e9e6df;--dot:rgba(28,32,30,.08);--sf:#fbfaf7;--sf2:#e7e4dd;--on:#fff;--ink:#1c201e;--ink2:#5b615d;--ink3:#8d928e;--line:rgba(28,32,30,.12);--ac:#0a7a66;--acI:#fff;--acS:rgba(10,122,102,.12);--wn:#c4470e;--wnS:#fbebe1;--sh:0 1px 2px rgba(20,24,22,.06),0 8px 28px rgba(20,24,22,.10);--f:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#111413;--map:#151917;--dot:rgba(235,232,225,.06);--sf:#1b1f1d;--sf2:#252a27;--on:#3a403c;--ink:#ebe8e1;--ink2:#a7aca8;--ink3:#707672;--line:rgba(235,232,225,.11);--ac:#4cc9ae;--acI:#04211a;--acS:rgba(76,201,174,.15);--wn:#ff8e57;--wnS:#2e1c14;--sh:0 1px 2px rgba(0,0,0,.3),0 10px 32px rgba(0,0,0,.45)}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--f);-webkit-font-smoothing:antialiased;overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;user-select:none;-webkit-user-select:none}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+p{margin:0}
+h1,h2,h3{margin:0;letter-spacing:-.01em}
+h2{font-size:26px;font-weight:700}
+h3{font-size:17px;font-weight:650}
+a{color:var(--ac)}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink2)}
+.small{font-size:13px}
+.warn{color:var(--wn);display:flex;gap:8px;align-items:flex-start}
+.err{color:var(--wn);font-size:14px;min-height:0}
+.err:empty{display:none}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
+
+/* Controls */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:0;border-radius:12px;background:var(--sf2);color:var(--ink);font-weight:600;font-size:15px;white-space:nowrap;transition:transform .08s,background-color .15s,opacity .15s}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--ac);color:var(--acI)}
+.btn.big{min-height:54px;font-size:16px;border-radius:14px}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px;border-radius:10px}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--wn)}
+.btn.pri.danger{background:var(--wn);color:#fff}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn.busy{opacity:.7;pointer-events:none}
+.busy::after{content:"";position:absolute;left:14px;right:14px;bottom:6px;height:2px;border-radius:2px;background:currentColor;opacity:.7;transform-origin:left;animation:bar .9s ease-in-out infinite}
+@keyframes bar{from{transform:scaleX(0)}to{transform:scaleX(1);opacity:0}}
+.icb{width:44px;padding:0}
+.link{border:0;background:none;color:var(--ac);font-weight:600;padding:8px 0;min-height:36px}
+.seg{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--sf2)}
+.seg button{flex:1 1 auto;min-width:0;min-height:38px;padding:0 8px;border:0;border-radius:9px;background:transparent;color:var(--ink2);font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background-color .15s,color .15s}
+.seg button[aria-pressed=true]{background:var(--on);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.seg.busy{opacity:.8}
+.seg:has(>:nth-child(5)) button{font-size:13px;padding:0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px 0 12px;border:1px solid var(--line);border-radius:999px;background:transparent;font-weight:600;font-size:14px;transition:background-color .15s,border-color .15s}
+.chip::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed=true]{background:var(--c);border-color:transparent}
+.chip[aria-pressed=true]::before{background:var(--ink);box-shadow:inset 0 0 0 3px var(--c)}
+.in{width:100%;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--sf);font-size:16px}
+.in:focus{border-color:var(--ac);outline:0;box-shadow:0 0 0 3px var(--acS)}
+select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink2) 50%),linear-gradient(135deg,var(--ink2) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+.fld{display:grid;gap:8px}
+.lab{font-size:13px;font-weight:600;color:var(--ink2)}
+.row{display:flex;gap:8px;align-items:center}
+.row .in{flex:1}
+input[role=switch]{appearance:none;flex:none;width:50px;height:30px;margin:0;border-radius:15px;background:var(--sf2);position:relative;cursor:pointer;transition:background-color .2s;box-shadow:inset 0 0 0 1px var(--line)}
+input[role=switch]::before{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+input[role=switch]:checked{background:var(--ac)}
+input[role=switch]:checked::before{transform:translateX(20px)}
+input[role=switch]:disabled{opacity:.4}
+
+/* Shell */
+.app{height:100vh;height:100dvh;display:grid;grid-template-columns:100%;grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"brand" "robots" "main" "nav"}
+.brand{grid-area:brand;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 16px 6px;font-weight:700;font-size:16px;letter-spacing:-.01em;flex-wrap:wrap}
+.brand>span{white-space:nowrap}
+.logo{width:26px;height:26px;flex:none}
+.tag{font-size:12px;font-weight:650;color:var(--ac);background:var(--acS);padding:2px 8px;border-radius:999px}
+.conn{margin-left:auto;font-size:13px;font-weight:600;color:var(--wn);display:flex;align-items:center;gap:6px}
+.conn::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+main{grid-area:main;min-height:0;position:relative}
+.view{height:100%}
+.robots{grid-area:robots;display:flex;gap:6px;overflow-x:auto;padding:4px 12px 8px;scrollbar-width:none;scroll-snap-type:x proximity}
+.robots::-webkit-scrollbar{display:none}
+.rlab{display:none}
+.app:not([data-view=robot]) .robots{display:none}
+.rb{position:relative;flex:none;display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 14px 6px 8px;border:1px solid transparent;border-radius:16px;background:transparent;text-align:left;scroll-snap-align:start;transition:background-color .15s}
+.rb[aria-current=true]{background:var(--sf);border-color:var(--line);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.rb-av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--sf2);color:var(--ink2)}
+.rb[data-act=cleaning] .rb-av,.rb[data-act=returning] .rb-av{background:var(--acS);color:var(--ac)}
+.rb.att .rb-av{background:var(--wnS);color:var(--wn)}
+.rb-t{display:grid;line-height:1.25;min-width:0}
+.rb-t b{font-size:15px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb-t small{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb.att small{color:var(--wn);font-weight:600}
+.rb-dot{position:absolute;top:7px;left:35px;width:11px;height:11px;border-radius:50%;background:var(--wn);box-shadow:0 0 0 2px var(--bg)}
+.nav{grid-area:nav;display:grid;grid-template-columns:repeat(4,1fr);padding:4px 4px calc(env(safe-area-inset-bottom) + 4px);background:var(--sf);border-top:1px solid var(--line)}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;padding:6px 0 4px;border:0;background:none;color:var(--ink2);font-size:12px;font-weight:600}
+.nav button .i{width:52px;height:30px;padding:4px 15px;border-radius:15px;transition:background-color .15s}
+.nav button[aria-current=true]{color:var(--ink)}
+.nav button[aria-current=true] .i{background:var(--acS);color:var(--ac)}
+
+/* Robot view */
+.rv{display:grid;grid-template-rows:minmax(230px,min(56%,var(--mh,56%))) minmax(0,1fr)}
+.lead{display:grid;gap:22px;align-content:start}
+.rv.empty{display:block}
+.rv.empty>.map,.rv.empty>.panel{display:none}
+.map{position:relative;overflow:hidden;background:var(--map);background-image:radial-gradient(var(--dot) 1px,transparent 1.3px);background-size:18px 18px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;contain:strict}
+.map:active{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.mapc{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+#ov{position:absolute;left:0;top:0;overflow:visible}
+.ng{fill:url(#hatch);stroke:var(--wn);stroke-opacity:.55;stroke-width:calc(1.5px / var(--z,1))}
+.ht{stroke:var(--wn);stroke-opacity:.4;stroke-width:1}
+.vw{stroke:var(--wn);stroke-width:calc(2.5px / var(--z,1));stroke-linecap:round}
+.pl{fill:none;stroke:var(--ac);stroke-width:calc(1.5px / var(--z,1));stroke-opacity:.6;stroke-linejoin:round;stroke-linecap:round}
+.mk{position:absolute;left:0;top:0;pointer-events:none;will-change:transform}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;font-size:12px;font-weight:650;color:var(--ink);opacity:.82;pointer-events:none;text-shadow:0 0 3px var(--map),0 0 2px var(--map);transition:opacity .15s}
+.lbl.on{opacity:1;font-weight:750}
+.lbl.hide{opacity:0}
+.dk{position:absolute;left:-12px;top:-12px;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--sf);color:var(--ink);box-shadow:0 0 0 1.5px var(--ink2),0 2px 6px rgba(0,0,0,.18)}
+.dk .i{width:15px;height:15px;stroke-width:2}
+.bot,.pinw{position:absolute;left:0;top:0}
+.bot svg{position:absolute;left:-17px;top:-17px;width:34px;height:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.28))}
+.b1{fill:var(--ac);stroke:var(--sf);stroke-width:2.5}
+.b2{fill:var(--sf);opacity:.9}
+.b3{fill:var(--sf)}
+.halo{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;background:var(--ac);opacity:0}
+.moving .halo{animation:halo 2.2s ease-out infinite}
+@keyframes halo{from{transform:scale(.45);opacity:.35}to{transform:scale(1.2);opacity:0}}
+.pinw{display:none}
+.stale .bot{display:none}
+.stale .pinw{display:block}
+.pin{position:absolute;left:-17px;top:-44px;width:34px;height:46px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.3))}
+.pin path{fill:var(--wn);stroke:var(--sf);stroke-width:2.2}
+.pin circle{fill:var(--sf)}
+.ring{position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;border:2.5px solid var(--wn);animation:ring 2.4s ease-out infinite}
+@keyframes ring{from{transform:scale(.3);opacity:.9}to{transform:scale(1.6);opacity:0}}
+.pinlab{position:absolute;left:0;top:10px;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--wn);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.banner{position:absolute;top:10px;left:10px;right:10px;max-width:560px;display:flex;align-items:center;gap:10px 12px;padding:10px 10px 10px 14px;border-radius:16px;background:var(--wnS);box-shadow:var(--sh),inset 3px 0 0 var(--wn);cursor:auto;animation:drop .25s ease-out}
+@keyframes drop{from{transform:translateY(-10px);opacity:0}}
+.banner>.i{color:var(--wn);margin-top:1px}
+.bt{flex:1 1 0;display:grid;gap:1px;min-width:0}
+.bt b{font-weight:700}
+.bt span{font-size:13px;line-height:1.35;color:var(--ink2)}
+.bb{display:flex;flex-direction:column;gap:6px}
+.bb .btn{background:var(--sf)}
+.fab{position:absolute;right:12px;bottom:12px;width:44px;height:44px;border:0;border-radius:14px;display:grid;place-items:center;background:var(--sf);color:var(--ink);box-shadow:var(--sh);transition:transform .25s}
+.has-bar .fab{transform:translateY(-70px)}
+.cleanbar{position:absolute;left:12px;right:12px;bottom:12px;max-width:470px;margin:0 auto;display:flex;gap:6px;align-items:center;padding:6px;border-radius:18px;background:var(--sf);box-shadow:var(--sh);cursor:auto;transform:translateY(130%);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.2,.8,.2,1),opacity .18s}
+.cleanbar.on{transform:none;opacity:1;pointer-events:auto}
+.cleanbar .pri{flex:1 1 auto;min-width:0}
+.cleanbar .pri span{overflow:hidden;text-overflow:ellipsis}
+.cleanbar .seg{flex:none}
+.cleanbar .seg button{min-width:36px;min-height:38px}
+.mapempty{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;padding:24px;text-align:center;color:var(--ink2);cursor:auto}
+.mapempty .i{width:40px;height:40px;stroke-width:1.3;color:var(--ink3)}
+.panel{overflow-y:auto;overscroll-behavior:contain;padding:18px 16px 28px;display:grid;align-content:start;gap:22px}
+.st{display:grid;gap:6px}
+.st-l{font-size:24px;font-weight:700;line-height:1.2;letter-spacing:-.015em}
+.st-e{color:var(--wn);font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--ink2);font-size:14px}
+.meta span{display:inline-flex;align-items:center;gap:6px}
+.meta .i{width:17px;height:17px}
+.bat{width:24px;height:13px;flex:none}
+.bat .bo{fill:none;stroke:currentColor;stroke-width:1.4}
+.bat .bt2,.bat .bf{fill:currentColor}
+.low{color:var(--wn)}
+.chg{color:var(--ac)}
+.job{display:flex;gap:28px;margin-top:6px}
+.job div{display:grid}
+.job b{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.job small{font-size:12px;color:var(--ink2)}
+.acts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.acts .btn:first-child{grid-column:1/-1}
+.acts:empty{display:none}
+.sec{display:grid;gap:10px}
+.sec h3{font-size:13px;font-weight:600;color:var(--ink2);letter-spacing:0}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between}
+#schedRooms[hidden]{display:inline!important;visibility:hidden}
+
+/* Pages */
+.page{overflow-y:auto;overscroll-behavior:contain}
+.pg{max-width:780px;margin:0 auto;padding:20px 16px 40px;display:grid;gap:22px;align-content:start}
+.pg-h{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.note{padding:12px 14px;border-radius:12px;background:var(--sf2);color:var(--ink2);font-size:14px}
+.empty-s{display:grid;justify-items:center;text-align:center;gap:10px;padding:48px 16px;color:var(--ink2)}
+.empty-s .i{width:44px;height:44px;stroke-width:1.3;color:var(--ink3)}
+.empty-s h3{color:var(--ink)}
+.scs{display:grid;gap:10px}
+.sc{display:flex;align-items:center;gap:12px;padding:6px 14px 6px 6px;border-radius:18px;background:var(--sf);border:1px solid var(--line)}
+.sc-m{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr;gap:2px 16px;align-items:baseline;padding:12px 10px;border:0;border-radius:14px;background:none;text-align:left}
+.sc-t{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;grid-row:span 2}
+.sc-d{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-w{font-size:14px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-n{grid-column:2;font-size:13px;color:var(--ink2)}
+.sc-f{grid-column:1/-1;font-size:13px;color:var(--wn);font-weight:600}
+.sc.off .sc-t,.sc.off .sc-d{color:var(--ink3)}
+.tl{display:grid;gap:4px}
+.tl h3{font-size:13px;color:var(--ink2);font-weight:600;margin:14px 0 4px}
+.tl h3:first-child{margin-top:0}
+.ev{display:grid;grid-template-columns:72px 30px 1fr;align-items:start;gap:6px;padding:7px 0}
+.ev time{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums;padding-top:2px;text-align:right;padding-right:6px}
+.ev .k{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--sf2);color:var(--ink2)}
+.ev .k .i{width:15px;height:15px;stroke-width:2}
+.ev .k.a{background:var(--acS);color:var(--ac)}
+.ev .k.w{background:var(--wnS);color:var(--wn)}
+.ev div{display:grid}
+.ev small{color:var(--ink2);font-size:13px}
+.sets{display:grid;gap:0}
+.set{display:grid;gap:12px;padding:22px 0;border-top:1px solid var(--line)}
+.set:first-child{border-top:0;padding-top:4px}
+.sw-row{justify-content:space-between;gap:16px;padding:4px 0;cursor:pointer}
+.sw-row span{display:grid}
+.sw-row small{color:var(--ink2);font-size:13px}
+.list{list-style:none;margin:0;padding:0;display:grid}
+.list li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list li>div{flex:1;min-width:0;display:grid}
+.list b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list small{color:var(--ink2);font-size:13px}
+.you{font-size:12px;font-weight:650;color:var(--ink2);background:var(--sf2);padding:1px 7px;border-radius:999px;margin-left:6px}
+.stack{display:grid;gap:10px}
+.tokbox{display:grid;gap:8px;padding:14px;border-radius:14px;background:var(--acS)}
+.tun-st{display:flex;align-items:center;gap:8px;font-weight:600}
+.tun-st i{width:9px;height:9px;border-radius:50%;background:var(--ink3)}
+.tun-st i.running{background:var(--ac)}
+.tun-st i.error{background:var(--wn)}
+details summary{cursor:pointer;font-weight:600;color:var(--ac);padding:6px 0}
+details[open] summary{margin-bottom:8px}
+.kv{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.onb{max-width:460px;margin:0 auto;padding:40px 20px;display:grid;gap:16px}
+.onb .logo{width:52px;height:52px}
+
+/* Sign in */
+.login{position:fixed;inset:0;display:grid;place-items:center;padding:24px;background:var(--bg);overflow:auto}
+.login form{width:100%;max-width:360px;display:grid;gap:16px}
+.login .logo{width:56px;height:56px}
+.login h1{font-size:26px;font-weight:700}
+
+/* Dialog */
+dialog{border:0;padding:0;overflow:auto;overscroll-behavior:contain;width:min(560px,calc(100% - 32px));max-height:min(88dvh,820px);border-radius:22px;background:var(--sf);color:var(--ink);box-shadow:var(--sh)}
+dialog[open]{animation:pop .2s ease-out}
+@keyframes pop{from{transform:translateY(16px) scale(.98);opacity:0}}
+dialog::backdrop{background:rgba(8,10,9,.45)}
+.dlg{position:relative;padding:22px 20px 20px;display:grid;gap:20px}
+.dlg h2{font-size:22px;padding-right:44px}
+.dlg .x{position:absolute;top:12px;right:12px}
+.dacts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#edB .dacts{position:sticky;bottom:0;margin:0 -20px -20px;padding:12px 20px 20px;background:var(--sf);border-top:1px solid var(--line)}
+.dacts .sp{flex:1}
+.days{display:grid;grid-template-columns:repeat(7,1fr)}
+.days button{padding:0}
+.days button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.quick{display:flex;gap:16px}
+
+/* Toasts */
+#toasts{position:fixed;margin:0;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 84px);display:grid;justify-items:center;gap:8px;pointer-events:none;z-index:10;padding:0 16px}
+.toast{display:flex;gap:10px;align-items:center;max-width:460px;padding:12px 16px;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:550;font-size:14px;box-shadow:var(--sh);transform:translateY(12px);opacity:0;transition:transform .2s,opacity .2s}
+.toast.on{transform:none;opacity:1}
+.toast .i{color:var(--wn)}
+
+@media (max-width:699px){
+ dialog{width:100%;max-width:100%;margin:auto 0 0;border-radius:22px 22px 0 0;max-height:92dvh}
+ dialog[open]{animation:sheet .26s cubic-bezier(.2,.8,.2,1)}
+ @keyframes sheet{from{transform:translateY(100%)}}
+ .dlg{padding-bottom:calc(env(safe-area-inset-bottom) + 20px)}
+ .dlg::before{content:"";position:absolute;top:8px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:2px;background:var(--line)}
+ .sc-t{font-size:21px}
+}
+@media (min-width:700px){
+ .app{grid-template-columns:92px minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"nav brand" "nav robots" "nav main"}
+ .brand{padding:14px 20px 8px}
+ .robots{padding:2px 16px 12px}
+ .nav{grid-template-columns:none;grid-auto-rows:min-content;align-content:start;gap:6px;padding:calc(env(safe-area-inset-top) + 64px) 6px 12px;border-top:0;border-right:1px solid var(--line);background:var(--bg)}
+ .rv{grid-template-rows:none;grid-template-columns:minmax(0,1fr) 340px}
+ .map{border-radius:20px 0 0 0}
+ .panel{padding:20px 20px 32px;border-left:1px solid var(--line)}
+ #toasts{bottom:24px}
+ .pg{padding:28px 32px 48px}
+}
+@media (min-width:700px) and (max-width:1099px) and (orientation:portrait){
+ .rv{grid-template-columns:none;grid-template-rows:minmax(320px,min(62%,var(--mh,62%))) minmax(0,1fr)}
+ .panel{border-left:0;border-top:1px solid var(--line);grid-template-columns:1fr 1fr;gap:22px 32px;padding:24px}
+ .lead{grid-row:1/span 9}
+}
+@media (min-width:1100px){
+ .app{grid-template-columns:256px minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"brand main" "nav main" "robots main"}
+ .brand{padding:22px 12px 18px 18px;gap:8px;font-size:15px}
+ .app[data-view] .robots{display:flex;flex-direction:column;overflow:auto;padding:8px 12px 16px;gap:4px;scroll-snap-type:none}
+ .rlab{display:block;font-size:13px;font-weight:600;color:var(--ink2);padding:14px 10px 6px}
+ .rb{width:100%}
+ .nav{padding:0 12px;gap:2px;border-right:0}
+ .nav button{flex-direction:row;gap:12px;min-height:44px;padding:0 12px;border-radius:12px;font-size:15px}
+ .nav button .i{width:20px;height:20px;padding:0;background:none!important}
+ .nav button[aria-current=true]{background:var(--acS);color:var(--ac)}
+ main{border-left:1px solid var(--line)}
+ .rv{grid-template-columns:minmax(0,1fr) 340px}
+ .map{border-radius:0}
+}
+@media (min-width:1100px) and (max-width:1399px){.app{grid-template-columns:244px minmax(0,1fr)}}
+@media (min-width:1400px){.app{grid-template-columns:280px minmax(0,1fr)}.rv{grid-template-columns:minmax(0,1fr) 400px}}
+@media (pointer:coarse){.seg button,.chip,.link,.btn.sm{min-height:44px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.halo{display:none}.ring{opacity:.6}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logo" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="var(--ac)"/><circle cx="32" cy="32" r="20" fill="var(--bg)"/><circle cx="32" cy="25" r="6.5" fill="var(--ac)"/><path d="M23.5 42.5h17" stroke="var(--ac)" stroke-width="3.5" stroke-linecap="round"/></symbol></svg>
+
+<div id="login" class="login" hidden>
+ <form id="loginForm" autocomplete="on">
+  <svg class="logo" aria-hidden="true"><use href="#logo"/></svg>
+  <h1>Roborock at Home</h1>
+  <label class="fld"><span class="lab">Email or name</span><input class="in" id="lgName" name="username" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+  <label class="fld"><span class="lab">Password</span><input class="in" id="lgPw" name="password" type="password" autocomplete="current-password" required></label>
+  <p class="err" id="lgErr" role="alert"></p>
+  <button class="btn pri big" id="lgBtn">Sign in</button>
+ </form>
+</div>
+
+<div id="app" class="app" data-view="robot">
+ <header class="brand"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg><span>Roborock at Home</span><span id="demoTag" class="tag" hidden>Demo</span><span id="conn" class="conn" role="status" hidden>Reconnecting</span></header>
+ <div id="robots" class="robots" aria-label="Robots"><span class="rlab">Robots</span></div>
+ <nav class="nav" id="nav" aria-label="Sections"></nav>
+ <main>
+  <section id="v-robot" class="view rv" aria-label="Robot">
+   <div class="map" id="map" role="application" aria-label="Floor plan. Tap a room to select it.">
+    <div id="world"><canvas class="mapc" width="1" height="1"></canvas><svg id="ov" width="1" height="1"><defs><pattern id="hatch" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0v3" class="ht"/></pattern></defs><g id="ovg"></g><polyline id="pathl" class="pl" points=""/></svg></div>
+    <div id="lbls"></div>
+    <div id="dockm" class="mk" hidden><span class="dk"></span></div>
+    <div id="botm" class="mk" hidden><div class="bot"><span class="halo"></span><svg viewBox="-17 -17 34 34" id="botb"><circle r="13" class="b1"/><circle r="4.6" class="b2" cx="-1.5"/><path d="M13 0 7.5 -4.2v8.4z" class="b3"/></svg></div><div class="pinw"><span class="ring"></span><svg class="pin" viewBox="0 0 34 46"><path d="M17 44.5S3 29.5 3 17a14 14 0 0 1 28 0c0 12.5-14 27.5-14 27.5z"/><circle cx="17" cy="17" r="5.5"/></svg><span class="pinlab num" id="pinlab"></span></div></div>
+    <div id="mapEmpty" class="mapempty" hidden></div>
+    <div id="banner" class="banner" role="alert" hidden></div>
+    <button id="fab" class="fab" data-a="recentre" aria-label="Recentre the map"></button>
+    <div id="cleanbar" class="cleanbar"><button class="btn icb ghost" data-a="cbClr" aria-label="Clear the selection" id="cbClr"></button><button class="btn pri" data-a="cbGo" id="cbGo"><span></span></button><div class="seg" id="cbRep" role="group" aria-label="Passes"><button data-a="rep" data-v="1" aria-pressed="true">1x</button><button data-a="rep" data-v="2" aria-pressed="false">2x</button><button data-a="rep" data-v="3" aria-pressed="false">3x</button></div></div>
+   </div>
+   <div class="panel" id="panel">
+    <div class="lead"><div class="st" aria-live="polite"><div class="st-l" id="stL">&nbsp;</div><div class="st-e" id="stE" hidden></div><div class="meta" id="stM"></div><div class="job" id="stJ" hidden></div></div>
+    <div class="acts" id="acts"></div></div>
+    <div class="sec" id="roomsSec" hidden><div class="sec-h"><h3>Rooms</h3><button class="link small" data-a="schedRooms" id="schedRooms" hidden>Schedule these rooms</button></div><div class="chips" id="chips"></div></div>
+    <div class="sec" id="fanSec" hidden><h3>Suction</h3><div class="seg" id="fanSeg" role="group" aria-label="Suction"></div></div>
+    <div class="sec" id="waterSec" hidden><h3>Mop water</h3><div class="seg" id="waterSeg" role="group" aria-label="Mop water"></div></div>
+    <div class="sec" id="locSec"><button class="btn" data-a="locate" id="locBtn" style="justify-self:start"></button></div>
+   </div>
+   <div id="robotEmpty" hidden></div>
+  </section>
+  <section id="v-schedules" class="view page" hidden><div class="pg"><div class="pg-h"><h2>Schedules</h2><button class="btn pri" data-a="newSched" id="newSched"></button></div><div id="schedNote" class="note" hidden></div><div id="schedList" class="scs"></div></div></section>
+  <section id="v-activity" class="view page" hidden><div class="pg"><h2>Activity</h2><div id="hist" class="tl"></div></div></section>
+  <section id="v-settings" class="view page" hidden><div class="pg"><h2>Settings</h2><div class="sets">
+   <div class="set" id="s-acct"></div><div class="set" id="s-tz"></div><div class="set" id="s-remote"></div><div class="set" id="s-people"></div><div class="set" id="s-tokens"></div><div class="set" id="s-pw"></div><div class="set" id="s-about"></div>
+  </div></div></section>
+ </main>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<dialog id="dlg"><div class="dlg" id="dlgIn"></div></dialog>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
+const DM = matchMedia('(prefers-color-scheme: dark)'), RM = matchMedia('(prefers-reduced-motion: reduce)');
+// Icons: one 24 px grid, one stroke (set in CSS).
+const P = {
+ robot: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="9.2" r="2.6"/><path d="M8.6 15.8h6.8"/>',
+ cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+ act: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+ set: '<path d="M4 7h9M18 7h2M4 17h3M12 17h8"/><circle cx="15.5" cy="7" r="2.5"/><circle cx="9.5" cy="17" r="2.5"/>',
+ play: '<path d="M8 5.8v12.4a.8.8 0 0 0 1.2.7l10-6.2a.8.8 0 0 0 0-1.4l-10-6.2A.8.8 0 0 0 8 5.8z"/>',
+ pause: '<path d="M9 5.5v13M15 5.5v13"/>',
+ stop: '<rect x="6" y="6" width="12" height="12" rx="2.5"/>',
+ dock: '<path d="M4 11.5 12 4.5l8 7M6.5 9.5v10h11v-10"/><path d="M12.6 11.2 10.4 14.6h3.2l-2.2 3.4"/>',
+ loc: '<path d="M4.5 9.5v5h3l4.5 4v-13l-4.5 4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+ bolt: '<path d="M13 3 5.5 13.5h5.5l-1 7.5 7.5-10.5H12z"/>',
+ alert: '<path d="M12 4.2 2.8 19.8h18.4z"/><path d="M12 10v4.2M12 17.2v.1"/>',
+ pin: '<path d="M12 21s-6.5-6-6.5-11.5a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/>',
+ target: '<circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/>',
+ plus: '<path d="M12 5v14M5 12h14"/>',
+ x: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+ copy: '<rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.5"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/>',
+ trash: '<path d="M4.5 7h15M10 11v6M14 11v6M6.5 7l.8 12.5a1.5 1.5 0 0 0 1.5 1.5h6.4a1.5 1.5 0 0 0 1.5-1.5L17.5 7M9.5 7V4.5h5V7"/>',
+ out: '<path d="M14.5 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/>',
+ wifi: '<path d="M4.5 10.5a11 11 0 0 1 15 0M7.5 14a6.5 6.5 0 0 1 9 0"/><circle cx="12" cy="17.6" r=".9"/>',
+ cloud: '<path d="M7.5 18.5h9.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.7 1.2A3.4 3.4 0 0 0 7.5 18.5z"/>',
+ off: '<path d="M4.5 10.5a11 11 0 0 1 15 0M7.5 14a6.5 6.5 0 0 1 9 0M4 4l16 16"/>',
+ check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ map: '<path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+};
+const ic = (n, c = '') => `<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+const need = (o, k) => { if (!(k in o)) throw new Error(`Unknown value ${k}`); return o[k]; };
+
+// ---------- Words and times ----------
+const TF = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: '2-digit'});
+const WD = new Intl.DateTimeFormat(undefined, {weekday: 'short'});
+const DF = new Intl.DateTimeFormat(undefined, {day: 'numeric', month: 'short'});
+const DAYN = [...Array(7)].map((_, i) => WD.format(new Date(2024, 0, 1 + i)));  // 2024-01-01 is a Monday
+const tm = ts => TF.format(ts * 1000);
+const dayDiff = ts => { const a = new Date(ts * 1000), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.round((a - b) / 864e5); };
+const day = ts => { const d = dayDiff(ts); return d === 0 ? 'Today' : d === -1 ? 'Yesterday' : d === 1 ? 'Tomorrow' : Math.abs(d) < 7 ? WD.format(ts * 1000) : DF.format(ts * 1000); };
+const when = ts => `${day(ts)} ${tm(ts)}`;
+const at = ts => { const d = dayDiff(ts); return d === 0 ? `at ${tm(ts)}` : d === -1 ? `yesterday at ${tm(ts)}` : `on ${day(ts)} at ${tm(ts)}`; };
+const ago = ts => { const s = Date.now() / 1000 - ts; return s < 60 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : s < 43200 ? `${Math.round(s / 3600)} h ago` : when(ts); };
+const until = ts => { const s = ts - Date.now() / 1000; return s < 60 ? 'in a moment' : s < 3600 ? `in ${Math.round(s / 60)} min` : s < 43200 ? `in ${Math.round(s / 3600)} h` : ''; };
+const hm = s => { const [h, m] = s.split(':').map(Number); return TF.format(new Date(2000, 0, 1, h, m)); };
+const dur = s => s < 3600 ? `${Math.max(1, Math.round(s / 60))} min` : `${Math.floor(s / 3600)} h ${Math.round(s % 3600 / 60)} min`;
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ');
+const andList = a => a.length < 2 ? a.join('') : a.length > 3 ? `${a.length} rooms` : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+const ACTW = {cleaning: 'Cleaning', returning: 'Going home', paused: 'Paused', docked: 'Docked', idle: 'Idle', error: 'Needs help', offline: 'Offline'};
+const actWord = r => r.activity === 'docked' && r.charging ? 'Charging' : need(ACTW, r.activity);
+
+// ---------- State ----------
+const S = {app: null, robots: new Map(), order: [], schedules: [], hist: null, sel: null, view: 'robot', rsel: new Map(),
+ repeat: 1, pend: new Map(), evn: new Map(), es: null, back: 1000, out: false, tzTried: false, acct: {step: 'email', email: ''},
+ tokens: null, newTok: null, users: null, me: null, stats: null, live: false, cachedBoot: false};
+const VIEWS = ['robot', 'schedules', 'activity', 'settings'];
+// localStorage can be missing or throw (private mode, blocked storage); the page works without it.
+const store = {
+ get() { try { return JSON.parse(localStorage.getItem('rah') || '{}'); } catch (e) { return {}; } },
+ save() {
+  const st = S.app && {app: S.app, robots: S.order.map(id => S.robots.get(id)), schedules: S.schedules};
+  try { localStorage.setItem('rah', JSON.stringify({sel: S.sel, view: S.view, st: S.out ? null : st})); } catch (e) { /* see above */ }
+ },
+};
+const selOf = id => { let s = S.rsel.get(id); if (!s) { s = new Set(); S.rsel.set(id, s); } return s; };
+// The robot as shown: the server's copy with any optimistic change laid over it.
+const R = id => { const r = S.robots.get(id), p = S.pend.get(id); return p ? {...r, ...p.over} : r; };
+const roomName = (r, id) => { if (id == null) return null; const x = r.rooms.find(m => m.id === id); return x ? x.name : null; };
+
+// ---------- API ----------
+class ApiError extends Error { constructor(status, code, msg, retry) { super(msg); this.status = status; this.code = code; this.retry = retry; } }
+async function api(method, path, body) {
+ const o = {method, headers: {}};
+ if (method !== 'GET') o.headers['X-RAH'] = '1';
+ if (body !== undefined) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(body); }
+ let r;
+ try { r = await fetch(path, o); } catch (e) {
+  if (e instanceof TypeError) throw new ApiError(0, 'network', 'Could not reach the app. Check the connection.');
+  throw e;
+ }
+ const text = await r.text();
+ let data = null;
+ if (text) { try { data = JSON.parse(text); } catch (e) { throw new ApiError(r.status, 'http', `The app gave an unexpected answer (${r.status}).`); } }
+ if (!r.ok) {
+  if (r.status === 401 && path !== '/api/login') signedOut();
+  if (!data || !data.error) throw new ApiError(r.status, 'http', `The app gave an unexpected answer (${r.status}).`);
+  throw new ApiError(r.status, data.error.code, data.error.message, r.headers.get('Retry-After'));
+ }
+ return data;
+}
+// Runs a request for a button: pending state at once, the error said where it belongs.
+async function run(btn, fn, errEl) {
+ if (btn) btn.classList.add('busy');
+ if (errEl) errEl.textContent = '';
+ try { return await fn(); } catch (e) {
+  if (!(e instanceof ApiError)) throw e;
+  if (errEl) errEl.textContent = e.message; else toast(e.message, true);
+ } finally { if (btn) btn.classList.remove('busy'); }
+}
+
+// ---------- Toasts and dialogs ----------
+function toast(msg, bad) {
+ const box = $('toasts');
+ while (box.children.length > 2) box.firstChild.remove();
+ const el = document.createElement('div');
+ el.className = 'toast';
+ el.innerHTML = (bad ? ic('alert') : '') + `<span>${esc(msg)}</span>`;
+ box.appendChild(el);
+ requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on')));
+ setTimeout(() => { el.classList.remove('on'); setTimeout(() => el.remove(), 250); }, bad ? 6000 : 3000);
+}
+const dlg = $('dlg'), dlgIn = $('dlgIn');
+let dlgDone = null, dlgFrom = null;
+function openDlg(html, done) {
+ // A dialog opened from another one replaces it in place; the first one is finished now.
+ const prev = dlgDone;
+ dlgDone = null;
+ if (prev) prev();
+ if (!dlg.open) dlgFrom = document.activeElement;
+ dlgIn.innerHTML = `<button type="button" class="btn icb ghost x" data-a="close" aria-label="Close">${ic('x')}</button>` + html;
+ dlgDone = done || null;
+ if (!dlg.open) { dlg.showModal(); dlg.appendChild($('toasts')); }
+ const f = dlgIn.querySelector('[autofocus]');
+ if (f) f.focus();
+}
+// Toasts live in the dialog while it is open: a modal dialog's backdrop covers everything else.
+dlg.addEventListener('close', () => { document.body.appendChild($('toasts')); const d = dlgDone; dlgDone = null; if (d) d(); if (dlgFrom && dlgFrom.isConnected) dlgFrom.focus(); });
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+function ask(title, text, ok) {
+ return new Promise(res => {
+  let yes = false;
+  openDlg(`<h2>${esc(title)}</h2><p class="muted">${esc(text)}</p><div class="dacts"><span class="sp"></span><button type="button" class="btn" data-a="close">Cancel</button><button type="button" class="btn pri danger" id="askYes">${esc(ok)}</button></div>`, () => res(yes));
+  $('askYes').onclick = () => { yes = true; dlg.close(); };
+ });
+}
+function copy(text) {
+ // execCommand works on plain http on the LAN, where navigator.clipboard does not exist.
+ const ta = document.createElement('textarea');
+ ta.value = text; ta.readOnly = true; ta.style.cssText = 'position:fixed;top:0;opacity:0';
+ (dlg.open ? dlgIn : document.body).appendChild(ta);
+ ta.select();
+ const ok = document.execCommand('copy');
+ ta.remove();
+ toast(ok ? 'Copied' : 'Could not copy. Select the text and copy it by hand.', !ok);
+}
+
+// ---------- Small DOM helpers ----------
+const setT = (el, v) => { v = String(v); if (el.textContent !== v) el.textContent = v; };
+const setH = (el, h) => { if (el._h !== h) { el._h = h; el.innerHTML = h; } };
+const seg = (k, opts, cur) => `<div class="seg" role="group" data-k="${k}">${opts.map(([v, l]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${String(v) === String(cur)}">${esc(l)}</button>`).join('')}</div>`;
+const fld = (label, body) => `<div class="fld"><span class="lab">${label}</span>${body}</div>`;
+const batt = (b, chg) => `<svg class="bat ${b <= 15 ? 'low' : chg ? 'chg' : ''}" viewBox="0 0 26 14" aria-hidden="true"><rect x=".7" y=".7" width="21.6" height="12.6" rx="3.4" class="bo"/><rect x="23.4" y="4.6" width="2.2" height="4.8" rx="1" class="bt2"/><rect x="2.8" y="2.8" width="${(17.4 * b / 100).toFixed(1)}" height="8.4" rx="1.8" class="bf"/></svg>`;
+
+// ---------- Room colours (one hue per room, distinct, designed per theme) ----------
+const HUES = [205, 32, 148, 338, 262, 78, 12, 182, 296, 52];
+const TONES = {
+ light: {n: [46, 86], d: [26, 89], s: [66, 70], e: [58, 38], wall: [116, 121, 117], floor: [221, 218, 210], seen: [224, 221, 213]},
+ dark: {n: [20, 25], d: [12, 21], s: [46, 39], e: [62, 66], wall: [139, 145, 141], floor: [43, 48, 45], seen: [29, 34, 31]},
+};
+const tone = () => TONES[DM.matches ? 'dark' : 'light'];
+function hsl(h, s, l) {
+ s /= 100; l /= 100;
+ const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); };
+ return [f(0), f(8), f(4)];
+}
+const hue = (r, id) => { const i = r.rooms.findIndex(m => m.id === id); return HUES[(i < 0 ? id : i) % HUES.length]; };
+const cssHsl = (h, t) => `hsl(${h} ${t[0]}% ${t[1]}%)`;
+const chip = (r, m, on, attr) => `<button class="chip" ${attr} data-v="${m.id}" aria-pressed="${on}" style="--c:${cssHsl(hue(r, m.id), tone().s)}">${esc(m.name)}</button>`;
+const pack = c => ((255 << 24) | (c[2] << 16) | (c[1] << 8) | c[0]) >>> 0;
+
+// ---------- The map ----------
+// Every robot's floor is fetched as soon as it is known and painted into its own canvas, so
+// switching robots only swaps which canvas is shown.
+const mapEl = $('map'), world = $('world'), ov = $('ov');
+const M = {id: null, w: 0, h: 0, bytes: null, s: 1, tx: 0, ty: 0, W: 0, H: 0, fit: 1, user: false,
+ lbls: [], lk: '', ok: '', raf: 0, anim: 0, live: null, bx: 0, by: 0, cx: 0, cy: 0};
+const maps = new Map();      // robot id -> {rev, w, h, bytes, cv, ctx, img, key}: the map ready to show
+const loading = new Map();   // robot id -> rev being fetched
+function loadMap(id, mp) {
+ const have = maps.get(id);
+ if ((have && have.rev === mp.rev) || loading.get(id) === mp.rev) return;
+ loading.set(id, mp.rev);
+ // Served immutable per rev, so after the first visit this comes from the browser's cache.
+ fetch(`/api/robots/${encodeURIComponent(id)}/map.bin?rev=${encodeURIComponent(mp.rev)}`).then(async res => {
+  if (loading.get(id) !== mp.rev) return;
+  // A 404 means the map changed again; the patch carrying the new rev starts that fetch.
+  if (res.status === 404 || res.status === 401) { loading.delete(id); return; }
+  if (!res.ok) throw new Error(`The map of ${S.robots.get(id).name} could not be loaded (${res.status}).`);
+  const b = new Uint8Array(await res.arrayBuffer());
+  if (loading.get(id) !== mp.rev) return;
+  if (b.length !== mp.w * mp.h) throw new Error(`The map has ${b.length} bytes, expected ${mp.w * mp.h}.`);
+  const cv = document.createElement('canvas');
+  cv.width = mp.w; cv.height = mp.h; cv.className = 'mapc';
+  const ctx = cv.getContext('2d');
+  maps.set(id, {rev: mp.rev, w: mp.w, h: mp.h, bytes: b, cv, ctx, img: ctx.createImageData(mp.w, mp.h), key: ''});
+  if (loading.get(id) === mp.rev) loading.delete(id);
+  paint(id);
+  if (S.sel === id && S.robots.has(id)) showMap();
+ }).catch(err => { if (loading.get(id) === mp.rev) loading.delete(id); toast(err.message, true); throw err; });
+}
+function showMap() {
+ const r = S.sel && R(S.sel), e = r && maps.get(r.id);
+ $('mapEmpty').hidden = !(r && !r.map);
+ if (r && !r.map) setH($('mapEmpty'), `${ic('map')}<b>No map yet</b><span class="small">The map appears after ${esc(r.name)} has cleaned once.</span>`);
+ if (!e || !r.map) { world.hidden = true; M.id = null; M.bytes = null; $('botm').hidden = $('dockm').hidden = true; $('lbls').hidden = true; return; }
+ world.hidden = false; $('lbls').hidden = false;
+ if (world.firstChild !== e.cv) {
+  const fresh = M.id !== r.id, dims = M.w !== e.w || M.h !== e.h;
+  world.replaceChild(e.cv, world.firstChild);
+  M.id = r.id; M.bytes = e.bytes; M.w = e.w; M.h = e.h;
+  if (dims) { ov.setAttribute('width', M.w); ov.setAttribute('height', M.h); ov.setAttribute('viewBox', `0 0 ${M.w} ${M.h}`); }
+  if (fresh) { M.user = false; M.live = null; M.ok = M.lk = ''; drawPath(r.id); }
+  if (fresh || (dims && !M.user)) { computeFit(); home(r); }
+ }
+ paint(r.id); overlay(r); labels(r); markers(r);
+}
+function paint(id) {
+ const e = maps.get(id);
+ if (!e) return;
+ const r = R(id), sel = selOf(id), key = `${DM.matches}|${[...sel]}|${r.rooms.map(m => m.id)}`;
+ if (e.key === key) return;
+ e.key = key;
+ const T = tone(), any = sel.size > 0, L = new Uint32Array(256), E = new Uint32Array(256);
+ L[1] = pack(T.wall); L[2] = pack(T.floor); L[3] = pack(T.seen);
+ for (let v = 4; v < 32; v++) L[v] = L[2];
+ for (let rid = 0; rid < 224; rid++) {
+  const h = hue(r, rid), on = sel.has(rid);
+  L[32 + rid] = pack(hsl(h, ...(on ? T.s : any ? T.d : T.n)));
+  if (on) E[32 + rid] = pack(hsl(h, ...T.e));
+ }
+ const b = e.bytes, w = e.w, hh = e.h, d = new Uint32Array(e.img.data.buffer);
+ for (let y = 0, i = 0; y < hh; y++) for (let x = 0; x < w; x++, i++) {
+  const v = b[i];
+  // A selected room gets a one-pixel edge in a deeper shade so it reads as chosen.
+  d[i] = E[v] && (x === 0 || x === w - 1 || y === 0 || y === hh - 1 || b[i - 1] !== v || b[i + 1] !== v || b[i - w] !== v || b[i + w] !== v) ? E[v] : L[v];
+ }
+ e.ctx.putImageData(e.img, 0, 0);
+}
+function overlay(r) {
+ const m = r.map, k = JSON.stringify([m.no_go, m.walls]);
+ if (M.ok === k) return;
+ M.ok = k;
+ $('ovg').innerHTML = m.no_go.map(p => `<polygon class="ng" points="${p.join(' ')}"/>`).join('') +
+  m.walls.map(w => `<line class="vw" x1="${w[0]}" y1="${w[1]}" x2="${w[2]}" y2="${w[3]}"/>`).join('');
+}
+function labels(r) {
+ const k = JSON.stringify([r.id, r.rooms, r.map.rooms]);
+ if (M.lk !== k) {
+  M.lk = k;
+  const box = $('lbls');
+  box.textContent = '';
+  M.lbls = [];
+  for (const rm of r.rooms) {
+   const g = r.map.rooms[rm.id];
+   if (!g) continue;
+   const el = document.createElement('span');
+   el.className = 'lbl';
+   el.textContent = rm.name;
+   box.appendChild(el);
+   M.lbls.push({el, id: rm.id, g, w: 0});
+  }
+  for (const l of M.lbls) l.w = l.el.offsetWidth;
+ }
+ const sel = selOf(r.id);
+ for (const l of M.lbls) l.el.classList.toggle('on', sel.has(l.id));
+ req();
+}
+function markers(r) {
+ const shown = M.id === r.id, c = r.map && r.map.charger, p = r.pos;
+ $('dockm').hidden = !(shown && c);
+ if (c) { M.cx = c.x; M.cy = c.y; }
+ const bot = $('botm');
+ bot.hidden = !(shown && p);
+ if (p) {
+  M.bx = p.x; M.by = p.y;
+  bot.classList.toggle('stale', !p.live);
+  bot.classList.toggle('moving', p.live && (r.activity === 'cleaning' || r.activity === 'returning'));
+  // The robot reports its angle with y up; the picture has y down.
+  if (p.live) $('botb').style.transform = `rotate(${-p.angle}deg)`;
+  else setT($('pinlab'), `Last seen ${dayDiff(p.ts) === 0 ? '' : day(p.ts) + ' '}${tm(p.ts)}`);
+  if (shown && M.live === true && !p.live && !M.user) home(r, true);
+  M.live = p.live;
+ }
+ req();
+}
+// The current job's path per robot, kept whole in memory and grown by `path` events.
+const paths = new Map();   // robot id -> {a: [x0, y0, ...], busy}
+const pathOf = id => { let e = paths.get(id); if (!e) { e = {a: [], busy: false}; paths.set(id, e); } return e; };
+function drawPath(id) {
+ if (M.id !== id) return;
+ const a = pathOf(id).a;
+ let s = '';
+ for (let i = 0; i + 1 < a.length; i += 2) s += a[i] + ',' + a[i + 1] + ' ';
+ $('pathl').setAttribute('points', s);
+}
+function fetchPath(id) {
+ const e = pathOf(id);
+ if (e.busy) return;
+ e.busy = true;
+ run(null, async () => { const d = await api('GET', `/api/robots/${encodeURIComponent(id)}/path`); e.a = d.points; drawPath(id); }).finally(() => { e.busy = false; });
+}
+function onPath(d) {
+ const e = pathOf(d.id);
+ if (e.busy) { fetchPath(d.id); return; }
+ if (d.start === 0) e.a = d.points.slice();
+ // `start` counts entries of the flat points array (numbers, not x,y pairs), as the server sends it.
+ else if (d.start === e.a.length) {
+  e.a.push(...d.points);
+  if (M.id === d.id) {
+   // Append in place: rebuilding a long path string every second would be wasteful.
+   const pl = $('pathl').points;
+   for (let i = 0; i + 1 < d.points.length; i += 2) { const p = ov.createSVGPoint(); p.x = d.points[i]; p.y = d.points[i + 1]; pl.appendItem(p); }
+   return;
+  }
+ } else { fetchPath(d.id); return; }
+ drawPath(d.id);
+}
+// Where the map sits above the controls, its box is only as tall as the plan needs at full width.
+const STACK = matchMedia('(max-width:699px),(max-width:1099px) and (orientation:portrait)');
+function computeFit() {
+ if (!M.w || !M.W) return;
+ const ins = insets();
+ $('v-robot').style.setProperty('--mh', STACK.matches ? Math.round((M.W - 24) * M.h / M.w + ins.t + ins.b) + 'px' : '');
+ M.fit = Math.min((M.W - 24) / M.w, (M.H - ins.t - ins.b) / M.h);
+}
+function insets() {
+ const ban = !$('banner').hidden, bar = $('cleanbar').classList.contains('on');
+ return {t: ban ? $('banner').offsetHeight + 22 : 12, b: bar ? 70 : 12};
+}
+const clampS = s => Math.min(Math.max(s, M.fit * .6), Math.max(M.fit * 12, 6));
+function home(r, anim) {
+ if (!M.w || !M.W) return;
+ computeFit();
+ const ins = insets(), s = M.fit;
+ to(s, (M.W - M.w * s) / 2, ins.t + (M.H - ins.t - ins.b - M.h * s) / 2, anim);
+}
+function focus(x, y, k, anim) {
+ const ins = insets(), s = clampS(M.fit * k);
+ to(s, M.W / 2 - x * s, ins.t + (M.H - ins.t - ins.b) / 2 - y * s, anim);
+}
+function to(s, tx, ty, anim) {
+ cancelAnimationFrame(M.anim);
+ if (!anim || RM.matches) { M.s = s; M.tx = tx; M.ty = ty; req(); return; }
+ const a = {s: M.s, tx: M.tx, ty: M.ty}, t0 = performance.now();
+ const step = now => {
+  const k = Math.min(1, (now - t0) / 280), e = 1 - Math.pow(1 - k, 3);
+  M.s = a.s + (s - a.s) * e; M.tx = a.tx + (tx - a.tx) * e; M.ty = a.ty + (ty - a.ty) * e;
+  layout();
+  if (k < 1) M.anim = requestAnimationFrame(step);
+ };
+ M.anim = requestAnimationFrame(step);
+}
+function clampView() {
+ // Keep the middle of the view over the map so it can never be lost off screen.
+ const cx = Math.min(Math.max((M.W / 2 - M.tx) / M.s, 0), M.w), cy = Math.min(Math.max((M.H / 2 - M.ty) / M.s, 0), M.h);
+ M.tx = M.W / 2 - cx * M.s; M.ty = M.H / 2 - cy * M.s;
+}
+const req = () => { if (!M.raf) M.raf = requestAnimationFrame(layout); };
+function layout() {
+ M.raf = 0;
+ const s = M.s, tx = M.tx, ty = M.ty;
+ world.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+ world.style.setProperty('--z', s);
+ $('botm').style.transform = `translate(${M.bx * s + tx}px,${M.by * s + ty}px)`;
+ $('dockm').style.transform = `translate(${M.cx * s + tx}px,${M.cy * s + ty}px)`;
+ for (const l of M.lbls) {
+  const g = l.g;
+  if (!l.w) l.w = l.el.offsetWidth;
+  const fits = (g.x1 - g.x0) * s > l.w + 8 && (g.y1 - g.y0) * s > 20;
+  l.el.classList.toggle('hide', !fits);
+  l.el.style.transform = `translate(${g.cx * s + tx - l.w / 2}px,${g.cy * s + ty - 8}px)`;
+ }
+}
+new ResizeObserver(([e]) => {
+ const {width, height} = e.contentRect;
+ if (!width || !height) return;
+ M.W = width; M.H = height;
+ computeFit();
+ if (M.id && !M.user) home(R(M.id)); else { clampView(); req(); }
+}).observe(mapEl);
+
+// Gestures: one finger pans, two pinch, wheel zooms, a tap picks a room, a double tap resets.
+const pts = new Map();
+let g = null, lastTap = null;
+function gStart(moved) {
+ const a = [...pts.values()], rc = mapEl.getBoundingClientRect();
+ cancelAnimationFrame(M.anim);
+ if (a.length === 1) g = {n: 1, x0: a[0].x, y0: a[0].y, tx: M.tx, ty: M.ty, ox: rc.left, oy: rc.top, t: performance.now(), moved};
+ else {
+  const [p, q] = a, mx = (p.x + q.x) / 2 - rc.left, my = (p.y + q.y) / 2 - rc.top;
+  g = {n: 2, d0: Math.hypot(p.x - q.x, p.y - q.y) || 1, s0: M.s, wx: (mx - M.tx) / M.s, wy: (my - M.ty) / M.s, ox: rc.left, oy: rc.top, moved: true};
+ }
+}
+mapEl.addEventListener('pointerdown', e => {
+ if (e.button !== 0 || !M.id || e.target.closest('button,.banner,.cleanbar')) return;
+ mapEl.setPointerCapture(e.pointerId);
+ pts.set(e.pointerId, {x: e.clientX, y: e.clientY});
+ if (pts.size <= 2) gStart(pts.size === 2);
+});
+mapEl.addEventListener('pointermove', e => {
+ const p = pts.get(e.pointerId);
+ if (!p || !g) return;
+ p.x = e.clientX; p.y = e.clientY;
+ if (g.n === 1) {
+  const dx = p.x - g.x0, dy = p.y - g.y0;
+  if (!g.moved && Math.hypot(dx, dy) > 6) g.moved = true;
+  if (!g.moved) return;
+  M.tx = g.tx + dx; M.ty = g.ty + dy;
+ } else {
+  const [a, b] = [...pts.values()], mx = (a.x + b.x) / 2 - g.ox, my = (a.y + b.y) / 2 - g.oy;
+  M.s = clampS(g.s0 * Math.hypot(a.x - b.x, a.y - b.y) / g.d0);
+  M.tx = mx - g.wx * M.s; M.ty = my - g.wy * M.s;
+ }
+ M.user = true; clampView(); req();
+});
+function pEnd(e) {
+ if (!pts.has(e.pointerId)) return;
+ pts.delete(e.pointerId);
+ const was = g;
+ if (pts.size === 0) {
+  g = null;
+  if (was && was.n === 1 && !was.moved && e.type === 'pointerup' && performance.now() - was.t < 600) tap(e.clientX - was.ox, e.clientY - was.oy);
+ } else gStart(true);
+}
+mapEl.addEventListener('pointerup', pEnd);
+mapEl.addEventListener('pointercancel', pEnd);
+mapEl.addEventListener('wheel', e => {
+ if (!M.id) return;
+ e.preventDefault();
+ cancelAnimationFrame(M.anim);
+ const rc = mapEl.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top;
+ const s = clampS(M.s * Math.exp(-e.deltaY * (e.deltaMode ? .05 : .0022)));
+ const wx = (mx - M.tx) / M.s, wy = (my - M.ty) / M.s;
+ M.s = s; M.tx = mx - wx * s; M.ty = my - wy * s;
+ M.user = true; clampView(); req();
+}, {passive: false});
+function hit(x, y) {
+ const r = R(M.id), wx = Math.floor((x - M.tx) / M.s), wy = Math.floor((y - M.ty) / M.s);
+ // Look a few pixels around the finger so a tap on a wall or doorway still finds the room.
+ for (let rad = 0; rad <= 4; rad++) for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) {
+  const px = wx + dx, py = wy + dy;
+  if (px < 0 || py < 0 || px >= M.w || py >= M.h) continue;
+  const v = M.bytes[py * M.w + px];
+  if (v >= 32 && r.rooms.some(m => m.id === v - 32)) return v - 32;
+ }
+ return null;
+}
+function tap(x, y) {
+ const now = performance.now();
+ if (lastTap && now - lastTap.t < 330 && Math.hypot(x - lastTap.x, y - lastTap.y) < 30) {
+  // A double tap resets the view; undo what its first tap selected.
+  if (lastTap.room != null) toggleRoom(lastTap.room);
+  lastTap = null; M.user = false; home(R(M.id), true);
+  return;
+ }
+ const room = hit(x, y);
+ if (room != null) toggleRoom(room);
+ lastTap = {t: now, x, y, room};
+}
+
+// ---------- Robot screen ----------
+const tabs = new Map();
+function tab(r) {
+ let el = tabs.get(r.id);
+ if (!el) {
+  el = document.createElement('button');
+  el.className = 'rb'; el.dataset.a = 'sel'; el.dataset.v = r.id;
+  el.innerHTML = `<span class="rb-av">${ic('robot')}</span><span class="rb-t"><b></b><small class="num"></small></span><i class="rb-dot" hidden></i>`;
+  tabs.set(r.id, el);
+ }
+ setT(el.querySelector('b'), r.name);
+ const st = r.attention ? r.attention.title : actWord(r);
+ setT(el.querySelector('small'), r.battery == null ? st : `${st} · ${r.battery}%`);
+ el.dataset.act = r.activity;
+ el.classList.toggle('att', !!r.attention);
+ el.querySelector('.rb-dot').hidden = !r.attention;
+ el.setAttribute('aria-current', String(r.id === S.sel));
+ el.setAttribute('aria-label', `${r.name}, ${st}${r.battery == null ? '' : `, battery ${r.battery}%`}`);
+ return el;
+}
+function orderTabs() {
+ const box = $('robots');
+ S.order.forEach((id, i) => { const el = tabs.get(id); if (box.children[i + 1] !== el) box.insertBefore(el, box.children[i + 1] || null); });
+}
+function select(id) {
+ if (S.sel !== id) { S.sel = id; store.save(); for (const [k, el] of tabs) el.setAttribute('aria-current', String(k === id)); M.ok = M.lk = ''; renderSel(); }
+ if (S.view !== 'robot') go('robot');
+ const el = tabs.get(id);
+ if (el && el.scrollIntoView && innerWidth < 1100) el.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: RM.matches ? 'auto' : 'smooth'});
+}
+const ACTS = {docked: ['start'], idle: ['start', 'dock'], cleaning: ['pause', 'stop', 'dock'], paused: ['resume', 'dock', 'stop'], returning: ['pause', 'stop'], error: ['resume', 'dock'], offline: []};
+const ACTL = {start: ['play', 'Clean whole home'], pause: ['pause', 'Pause'], resume: ['play', 'Resume'], stop: ['stop', 'Stop'], dock: ['dock', 'Go to dock']};
+function renderSel() {
+ const r = S.sel ? R(S.sel) : null;
+ $('v-robot').classList.toggle('empty', !r);
+ $('robotEmpty').hidden = !!r;
+ if (!r) { renderEmpty(); return; }
+ const off = !r.online || r.activity === 'offline';
+ // Status
+ setT($('stL'), off ? 'Not answering' : r.state_label);
+ const errL = r.error && r.error.label !== r.state_label ? r.error.label : '';
+ $('stE').hidden = !errL; setT($('stE'), errL);
+ const link = need({local: ['wifi', 'Local network'], cloud: ['cloud', 'Through the cloud'], none: ['off', 'No connection']}, off ? 'none' : r.link);
+ setH($('stM'), (r.battery == null ? '' : `<span class="num ${r.battery <= 15 ? 'low' : r.charging ? 'chg' : ''}">${batt(r.battery, r.charging)}${r.battery}%${r.charging ? ic('bolt') : ''}</span>`) +
+  `<span>${ic(link[0])}${link[1]}</span>` + (off ? `<span>Last heard ${esc(ago(r.seen))}</span>` : ''));
+ const job = r.clean && !off && ['cleaning', 'paused', 'returning'].includes(r.activity);
+ $('stJ').hidden = !job;
+ if (job) setH($('stJ'), `<div><b>${r.clean.area_m2.toFixed(1)} m²</b><small>Cleaned</small></div><div><b>${dur(r.clean.seconds)}</b><small>So far</small></div>`);
+ // Actions
+ const sel = selOf(r.id), list = need(ACTS, off ? 'offline' : r.activity), acts = $('acts');
+ const key = list.join() + (sel.size ? '+' : '');
+ if (acts._k !== key) {
+  acts._k = key;
+  acts.innerHTML = list.map((c, i) => `<button class="btn ${i ? '' : sel.size ? 'big' : 'pri big'}" data-a="cmd" data-c="${c}">${ic(ACTL[c][0])}${ACTL[c][1]}</button>`).join('');
+ }
+ // Rooms
+ const chips = $('chips'), ck = JSON.stringify([r.id, r.rooms, DM.matches]);
+ if (chips._k !== ck) {
+  chips._k = ck;
+  chips.innerHTML = r.rooms.map(m => chip(r, m, false, 'data-a="room"')).join('');
+ }
+ $('roomsSec').hidden = !r.rooms.length;
+ syncRooms(r);
+ // Suction and water
+ segFill('fanSeg', 'fan', r.fan_options, r.fan, off); $('fanSec').hidden = !r.fan_options.length;
+ segFill('waterSeg', 'water', r.water_options, r.water, off); $('waterSec').hidden = !r.water_options.length;
+ $('locBtn').disabled = off;
+ banner(r);
+ showMap();
+}
+function segFill(id, k, opts, cur, off) {
+ const el = $(id), key = opts.join();
+ if (el._k !== key) { el._k = key; el.innerHTML = opts.map(o => `<button type="button" data-a="${k}" data-v="${esc(o)}">${esc(cap(o))}</button>`).join(''); }
+ for (const b of el.children) { b.setAttribute('aria-pressed', String(b.dataset.v === cur)); b.disabled = off; }
+}
+function syncRooms(r) {
+ const sel = selOf(r.id);
+ for (const b of $('chips').children) b.setAttribute('aria-pressed', String(sel.has(Number(b.dataset.v))));
+ $('schedRooms').hidden = !sel.size;
+ const on = sel.size > 0 && r.online && r.activity !== 'offline', cb = $('cleanbar');
+ if (on !== cb.classList.contains('on')) { cb.classList.toggle('on', on); mapEl.classList.toggle('has-bar', on); }
+ if (on) {
+  setT($('cbGo').firstChild, sel.size === 1 ? `Clean ${roomName(r, [...sel][0])}` : `Clean ${sel.size} rooms`);
+  for (const b of $('cbRep').children) b.setAttribute('aria-pressed', String(Number(b.dataset.v) === S.repeat));
+ }
+}
+function toggleRoom(id) {
+ const r = R(S.sel), sel = selOf(r.id);
+ if (sel.has(id)) sel.delete(id); else sel.add(id);
+ roomsChanged();
+}
+const roomsChanged = () => renderSel();
+function banner(r) {
+ const a = r.attention, el = $('banner');
+ const key = a ? JSON.stringify([a, r.pos && r.pos.ts, r.online, r.rooms.length]) : '';
+ if (el._k === key) return;
+ el._k = key;
+ const was = !el.hidden;
+ el.hidden = !a;
+ if (a) {
+  const rm = roomName(r, a.room), inRoom = rm ? ` in ${rm}` : '';
+  const line = a.kind === 'error' ? `Stopped${inRoom} ${at(a.since)}.` :
+   a.kind === 'offline' ? `Last seen${inRoom} ${at(r.pos ? r.pos.ts : a.since)}.` :
+   r.activity === 'docked' ? 'On the dock but not charging. Check that the dock has power.' : `Running low${inRoom}. Send it back to charge.`;
+  el.innerHTML = `${ic('alert')}<div class="bt"><b>${esc(a.title)}</b><span>${esc(line)}${a.battery == null ? '' : ` Battery ${a.battery}%.`}</span></div><div class="bb">` +
+   (r.pos ? `<button class="btn sm" data-a="showpin">${ic('pin')}Show on map</button>` : '') +
+   (a.kind === 'low_battery' && r.online && r.activity !== 'docked' ? `<button class="btn sm" data-a="cmd" data-c="dock">${ic('dock')}Go to dock</button>` : '') + '</div>';
+ }
+ if (was !== !!a && M.id === r.id && !M.user) home(r);
+}
+function renderEmpty() {
+ const app = S.app, el = $('robotEmpty');
+ if (!app) return;
+ if (!app.account.linked && !app.demo) {
+  setH(el, `<div class="onb"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg><h2>Link your Roborock account</h2><div class="stack" data-acct>${acctHTML()}</div></div>`);
+ } else {
+  setH(el, `<div class="empty-s">${ic('robot')}<h3>No robots yet</h3><p>The account is linked, but no robots were found. Robots added in the Roborock app appear here by themselves.</p>${app.account.problem ? `<p class="warn">${ic('alert')}${esc(app.account.problem)}</p>` : ''}</div>`);
+ }
+}
+
+// ---------- Commands, shown at once and confirmed by the next robot event ----------
+const OPT = {start: {activity: 'cleaning', state_label: 'Starting'}, pause: {activity: 'paused', state_label: 'Pausing'}, resume: {activity: 'cleaning', state_label: 'Resuming'},
+ stop: {activity: 'idle', state_label: 'Stopping'}, dock: {activity: 'returning', state_label: 'Heading to the dock'}, clean_rooms: {activity: 'cleaning'}, locate: {}, set_fan: {}, set_water: {}};
+async function cmd(id, command, extra, btn) {
+ const r = S.robots.get(id), over = {...need(OPT, command)};
+ if (command === 'set_fan') over.fan = extra.value;
+ if (command === 'set_water') over.water = extra.value;
+ if (command === 'clean_rooms') over.state_label = `Starting ${plural(extra.rooms.length, 'room')}`;
+ if (over.activity === 'cleaning' || over.activity === 'paused') { over.error = null; over.attention = null; }
+ let p = S.pend.get(id);
+ if (!p) { p = {over: {}, n: 0}; S.pend.set(id, p); }
+ Object.assign(p.over, over); p.n++;
+ if (btn) btn.classList.add('busy');
+ refresh(id);
+ const seen = S.evn.get(id);
+ try {
+  await api('POST', `/api/robots/${encodeURIComponent(id)}/command`, {command, ...extra});
+  p.n--;
+  // The robot's new state may have arrived while the request was out; then it is already confirmed.
+  if (!p.n && S.evn.get(id) !== seen && S.pend.get(id) === p) S.pend.delete(id);
+  if (command === 'locate') toast(`${r.name} is playing a sound.`);
+  if (command === 'clean_rooms' && S.pend.get(id) === p) { selOf(id).clear(); }
+  setTimeout(() => { if (S.pend.get(id) === p && !p.n) { S.pend.delete(id); refresh(id); } }, 10000);
+ } catch (e) {
+  p.n--;
+  for (const k in over) delete p.over[k];
+  if (!p.n && !Object.keys(p.over).length && S.pend.get(id) === p) S.pend.delete(id);
+  if (!(e instanceof ApiError)) throw e;
+  toast(e.message, true);
+ } finally {
+  if (btn) btn.classList.remove('busy');
+  refresh(id);
+ }
+}
+function refresh(id) {
+ tab(R(id));
+ if (id === S.sel) renderSel();
+}
+
+// ---------- Schedules ----------
+function daysText(d) {
+ const k = [...d].sort().join('');
+ return k === '0123456' ? 'Every day' : k === '01234' ? 'Weekdays' : k === '56' ? 'Weekends' : [...d].sort().map(i => DAYN[i]).join(', ');
+}
+function whatText(s) {
+ const r = S.robots.get(s.robot), a = s.action;
+ const what = a.type === 'clean_all' ? 'Whole home' : andList(a.rooms.map(id => (r && roomName(r, id)) || 'a room')) + (a.repeat > 1 ? `, ${a.repeat} passes` : '');
+ return S.order.length > 1 ? `${what} · ${r ? r.name : 'a removed robot'}` : what;
+}
+function renderSched() {
+ if (!S.app) return;
+ const noTz = !S.app.tz, none = !S.order.length;
+ const nb = $('newSched');
+ setH(nb, `${ic('plus')}New schedule`);
+ nb.disabled = noTz || none;
+ $('schedNote').hidden = !(noTz || none);
+ setT($('schedNote'), none ? 'Schedules can be made once a robot is linked.' : 'Set the time zone in Settings before making a schedule.');
+ const list = [...S.schedules].sort((a, b) => a.time.localeCompare(b.time));
+ setH($('schedList'), list.length ? list.map(s => {
+  const nx = s.enabled && s.next_run ? `Next: ${when(s.next_run)}${until(s.next_run) ? ` (${until(s.next_run)})` : ''}` : 'Off';
+  const fail = s.last_run && !s.last_run.ok ? `<span class="sc-f">Last run ${esc(when(s.last_run.ts))} did not start: ${esc(s.last_run.message)}</span>` : '';
+  return `<div class="sc ${s.enabled ? '' : 'off'}"><button class="sc-m" data-a="editSched" data-v="${esc(s.id)}" aria-label="Edit schedule at ${esc(hm(s.time))}"><span class="sc-t">${esc(hm(s.time))}</span><span class="sc-d">${esc(daysText(s.days))}</span><span class="sc-w">${esc(whatText(s))}</span><span class="sc-n">${esc(nx)}</span>${fail}</button><input type="checkbox" role="switch" data-ch="schedOn" data-v="${esc(s.id)}" aria-label="On" ${s.enabled ? 'checked' : ''}></div>`;
+ }).join('') : `<div class="empty-s">${ic('cal')}<h3>No schedules yet</h3><p>Add one and a robot cleans on its own, for example every weekday at 9:30 am.</p></div>`);
+}
+const schedBody = s => ({robot: s.robot, name: s.name, enabled: s.enabled, days: s.days, time: s.time, action: s.action});
+async function schedOn(input) {
+ const s = S.schedules.find(x => x.id === input.dataset.v);
+ if (!s) throw new Error(`No schedule ${input.dataset.v}`);
+ const on = input.checked, before = s.enabled;
+ s.enabled = on; renderSched();
+ try {
+  const n = await api('PUT', `/api/schedules/${encodeURIComponent(s.id)}`, schedBody(s));
+  S.schedules = S.schedules.map(x => x.id === n.id ? n : x); renderSched();
+ } catch (e) {
+  s.enabled = before; renderSched();
+  if (!(e instanceof ApiError)) throw e;
+  toast(e.message, true);
+ }
+}
+let ED = null;
+function openEditor(s, preset) {
+ const first = S.sel && S.robots.has(S.sel) ? S.sel : S.order[0];
+ ED = s ? {id: s.id, enabled: s.enabled, robot: s.robot, mode: s.action.type === 'clean_rooms' ? 'rooms' : 'all',
+   rooms: new Set(s.action.type === 'clean_rooms' ? s.action.rooms : []), repeat: s.action.type === 'clean_rooms' ? s.action.repeat : 1,
+   days: new Set(s.days), time: s.time, fan: s.action.fan, water: s.action.water}
+  : {id: null, enabled: true, robot: preset ? preset.robot : first, mode: preset && preset.rooms.size ? 'rooms' : 'all',
+   rooms: new Set(preset ? preset.rooms : []), repeat: 1, days: new Set([0, 1, 2, 3, 4]), time: '09:30', fan: null, water: null};
+ openDlg(`<h2>${s ? 'Edit schedule' : 'New schedule'}</h2><div id="edB" class="stack" style="gap:20px"></div>`, () => { ED = null; });
+ edRender();
+}
+function edRender(focusKey) {
+ const r = S.robots.get(ED.robot);
+ if (!r) throw new Error(`No robot ${ED.robot}`);
+ const parts = [];
+ if (S.order.length > 1) parts.push(fld('Robot', seg('robot', S.order.map(id => [id, S.robots.get(id).name]), ED.robot)));
+ let what = seg('mode', [['all', 'Whole home'], ['rooms', 'Pick rooms']], ED.mode);
+ if (ED.mode === 'rooms') {
+  what += r.rooms.length ? `<div class="chips" data-k="room">${r.rooms.map(m => chip(r, m, ED.rooms.has(m.id), 'type="button"')).join('')}</div>` + seg('repeat', [[1, 'Once'], [2, 'Twice'], [3, '3 times']], ED.repeat)
+   : `<p class="muted small">${esc(r.name)} has not shared its rooms yet.</p>`;
+ }
+ parts.push(fld('What', what));
+ parts.push(fld('Days', `<div class="seg days" data-k="day" role="group">${DAYN.map((n, i) => `<button type="button" data-v="${i}" aria-pressed="${ED.days.has(i)}">${esc(n)}</button>`).join('')}</div><div class="quick" data-k="quick"><button type="button" class="link" data-v="all">Every day</button><button type="button" class="link" data-v="wk">Weekdays</button><button type="button" class="link" data-v="we">Weekends</button></div>`));
+ parts.push(`<label class="fld"><span class="lab">Time</span><input class="in num" type="time" id="edTime" value="${esc(ED.time)}" required style="max-width:200px"></label>`);
+ if (r.fan_options.length) parts.push(fld('Suction', seg('fan', [['', 'As it is'], ...r.fan_options.map(o => [o, cap(o)])], ED.fan == null ? '' : ED.fan)));
+ if (r.water_options.length) parts.push(fld('Mop water', seg('water', [['', 'As it is'], ...r.water_options.map(o => [o, cap(o)])], ED.water == null ? '' : ED.water)));
+ parts.push(`<p class="err" id="edErr" role="alert"></p><div class="dacts">${ED.id ? `<button type="button" class="btn ghost danger" data-a="edDel">${ic('trash')}Delete</button><button type="button" class="btn" data-a="edRun">${ic('play')}Run now</button>` : ''}<span class="sp"></span><button type="button" class="btn pri" data-a="edSave">${ic('check')}${ED.id ? 'Save' : 'Add schedule'}</button></div>`);
+ $('edB').innerHTML = parts.join('');
+ $('edTime').addEventListener('input', e => { ED.time = e.target.value; });
+ if (focusKey) { const f = $('edB').querySelector(`[data-k="${focusKey[0]}"] [data-v="${focusKey[1]}"], [data-k="${focusKey[0]}"][data-v="${focusKey[1]}"]`); if (f) f.focus(); }
+}
+dlgIn.addEventListener('click', e => {
+ if (!ED) return;
+ const b = e.target.closest('[data-v]'), box = b && b.closest('[data-k]');
+ if (!box || !$('edB').contains(box)) return;
+ const k = box.dataset.k, v = b.dataset.v;
+ if (k === 'robot') { ED.robot = v; ED.rooms.clear(); ED.fan = ED.water = null; }
+ else if (k === 'mode') ED.mode = v;
+ else if (k === 'room') { const id = Number(v); if (ED.rooms.has(id)) ED.rooms.delete(id); else ED.rooms.add(id); }
+ else if (k === 'repeat') ED.repeat = Number(v);
+ else if (k === 'day') { const d = Number(v); if (ED.days.has(d)) ED.days.delete(d); else ED.days.add(d); }
+ else if (k === 'quick') ED.days = new Set(need({all: [0, 1, 2, 3, 4, 5, 6], wk: [0, 1, 2, 3, 4], we: [5, 6]}, v));
+ else if (k === 'fan') ED.fan = v || null;
+ else if (k === 'water') ED.water = v || null;
+ else return;
+ edRender([k, v]);
+});
+async function edSave(btn) {
+ const err = $('edErr');
+ if (!ED.days.size) { err.textContent = 'Pick at least one day.'; return; }
+ if (ED.mode === 'rooms' && !ED.rooms.size) { err.textContent = 'Pick at least one room, or choose Whole home.'; return; }
+ if (!/^\d\d:\d\d$/.test(ED.time)) { err.textContent = 'Set a time.'; return; }
+ const action = ED.mode === 'rooms' ? {type: 'clean_rooms', rooms: [...ED.rooms], repeat: ED.repeat, fan: ED.fan, water: ED.water} : {type: 'clean_all', fan: ED.fan, water: ED.water};
+ const body = {robot: ED.robot, enabled: ED.enabled, days: [...ED.days].sort(), time: ED.time, action};
+ const id = ED.id;
+ const s = await run(btn, () => id ? api('PUT', `/api/schedules/${encodeURIComponent(id)}`, body) : api('POST', '/api/schedules', body), err);
+ if (!s) return;
+ S.schedules = id ? S.schedules.map(x => x.id === id ? s : x) : [...S.schedules.filter(x => x.id !== s.id), s];
+ renderSched(); dlg.close();
+ toast(id ? 'Schedule saved' : `Added: ${daysText(s.days)} at ${hm(s.time)}`);
+}
+
+// ---------- Activity ----------
+const HK = {started: ['play', 'a'], finished: ['check', 'a'], docked: ['dock', ''], error: ['alert', 'w'], cleared: ['check', ''], offline: ['off', 'w'], online: ['wifi', ''], schedule: ['cal', 'a'], command: ['robot', '']};
+async function loadHist() {
+ const h = await run(null, () => api('GET', '/api/history?limit=100'));
+ if (h) { S.hist = h; renderHist(); }
+}
+function renderHist() {
+ if (!S.hist) return;
+ let last = '', out = '';
+ for (const e of S.hist) {
+  const d = day(e.ts);
+  if (d !== last) { out += `<h3>${esc(dayDiff(e.ts) > -7 ? d : DF.format(e.ts * 1000))}</h3>`; last = d; }
+  const k = need(HK, e.kind), r = S.robots.get(e.robot);
+  out += `<div class="ev"><time class="num">${esc(tm(e.ts))}</time><span class="k ${k[1]}">${ic(k[0])}</span><div><span>${esc(e.text)}</span>${r && S.order.length > 1 ? `<small>${esc(r.name)}</small>` : ''}</div></div>`;
+ }
+ setH($('hist'), out || `<div class="empty-s">${ic('act')}<h3>Nothing yet</h3><p>Cleans, docking and problems show up here as they happen.</p></div>`);
+}
+
+// ---------- Settings ----------
+let TZS = null;
+function acctHTML() {
+ const a = S.app.account;
+ if (S.app.demo) return `<p>This is the demo. The four robots are simulated, so nothing done here reaches a real robot. Linking a Roborock account is not available in the demo.</p>`;
+ if (a.linked) return `<div class="kv"><span class="muted">Linked as</span><b>${esc(a.email)}</b></div>${a.problem ? `<p class="warn">${ic('alert')}<span>${esc(a.problem)}</span></p>` : ''}<div><button class="btn danger" data-a="unlink">Unlink account</button></div>`;
+ if (S.acct.step === 'email') return `<p class="muted">Use the email address of your Roborock app account. Roborock emails you a code.</p><form data-f="code" class="stack"><input class="in" type="email" name="email" autocomplete="email" autocapitalize="off" spellcheck="false" required placeholder="Email" aria-label="Email" value="${esc(S.acct.email)}"><p class="err"></p><div><button class="btn pri">Send code</button></div></form>`;
+ return `<p class="muted">Enter the code Roborock sent to ${esc(S.acct.email)}.</p><form data-f="link" class="stack"><input class="in num" name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="Code" aria-label="Code"><p class="err"></p><div class="row"><button class="btn pri">Link account</button><button type="button" class="link" data-a="acctBack">Use a different email</button></div></form>`;
+}
+function renderSettings() {
+ if (S.view !== 'settings' || !S.app) return;
+ const app = S.app, t = app.tunnel;
+ setH($('s-acct'), `<h3>Roborock account</h3>${acctHTML()}`);
+ if (!TZS) TZS = Intl.supportedValuesOf('timeZone');
+ const tz = app.tz;
+ setH($('s-tz'), `<h3>Time zone</h3><p class="muted">Schedules run in this time zone.</p><form data-f="tz" class="row"><select class="in" name="tz" aria-label="Time zone">${tz ? '' : '<option value="">Not set</option>'}${TZS.map(z => `<option${z === tz ? ' selected' : ''}>${z}</option>`).join('')}</select><button class="btn">Save</button></form>`);
+ const tst = need({stopped: 'Off', installing: 'Getting Cloudflare ready', starting: 'Connecting', running: 'On', error: 'Not working'}, t.status);
+ setH($('s-remote'), `<h3>Remote access</h3><p class="muted">Open this page from anywhere through Cloudflare. Everyone still needs to sign in.</p>` +
+  `<label class="row sw-row"><span><b>Quick link</b><small>A free address that works straight away.</small></span><input type="checkbox" role="switch" data-ch="quick" ${t.mode === 'quick' ? 'checked' : ''} ${t.mode === 'token' ? 'disabled' : ''}></label>` +
+  (t.mode !== 'off' ? `<p class="tun-st"><i class="${esc(t.status)}"></i>${tst}</p>` : '') +
+  (t.url ? `<div class="row"><input class="in mono" readonly value="${esc(t.url)}" aria-label="Address"><button class="btn" data-a="copy" data-t="${esc(t.url)}">${ic('copy')}Copy</button></div>${t.mode === 'quick' ? '<p class="muted small">This link changes when the app restarts.</p>' : ''}` : '') +
+  (t.error ? `<p class="warn">${ic('alert')}<span>${esc(t.error)}</span></p>` : '') +
+  (t.mode === 'token' ? `<p>Using your own Cloudflare tunnel, so the address stays the same.</p><div><button class="btn" data-a="tunOff">Turn off remote access</button></div>` :
+   t.mode === 'off' ? `<details><summary>Use a permanent address</summary><div class="stack"><p class="muted small">Make a tunnel in the Cloudflare dashboard and paste its token here.</p><form data-f="tunnel" class="row"><input class="in mono" name="token" required placeholder="Tunnel token" aria-label="Tunnel token" autocomplete="off" spellcheck="false"><button class="btn">Connect</button></form><p class="err" id="tunErr"></p></div></details>` : ''));
+ setH($('s-people'), `<h3>People</h3><p class="muted">Everyone here can sign in and has the same access.</p>` + (S.users ? `<ul class="list">${S.users.map(u => `<li><div><b>${esc(u.name)}${u.you ? '<span class="you">You</span>' : ''}</b><small>Added ${esc(DF.format(u.created * 1000))}</small></div>${u.you ? '' : `<button class="btn icb ghost danger" data-a="delUser" data-v="${esc(u.name)}" aria-label="Remove ${esc(u.name)}">${ic('trash')}</button>`}</li>`).join('')}</ul>` : '') +
+  `<details><summary>Add a person</summary><form data-f="user" class="stack"><input class="in" name="name" required maxlength="100" placeholder="Email or name" aria-label="Email or name" autocomplete="off" autocapitalize="off" spellcheck="false"><input class="in" name="password" type="password" required minlength="8" placeholder="Password, at least 8 characters" aria-label="Password" autocomplete="new-password"><p class="err"></p><div><button class="btn pri">Add person</button></div></form></details>`);
+ setH($('s-tokens'), `<h3>API tokens</h3><p class="muted">For scripts, agents and home automation. See the <a href="/api/docs" target="_blank" rel="noopener">API documentation</a>.</p>` +
+  (S.newTok ? `<div class="tokbox"><b>${esc(S.newTok.name)}</b><div class="row"><input class="in mono" readonly value="${esc(S.newTok.token)}" aria-label="New token"><button class="btn" data-a="copy" data-t="${esc(S.newTok.token)}">${ic('copy')}Copy</button></div><p class="small">Copy it now. It is not shown again.</p></div>` : '') +
+  (S.tokens && S.tokens.length ? `<ul class="list">${S.tokens.map(k => `<li><div><b>${esc(k.name)}</b><small>${k.scope === 'control' ? 'Control' : 'Read only'} · made ${esc(DF.format(k.created * 1000))} · ${k.last_used ? 'used ' + esc(ago(k.last_used)) : 'never used'}</small></div><button class="btn icb ghost danger" data-a="delTok" data-v="${esc(k.id)}" aria-label="Delete ${esc(k.name)}">${ic('trash')}</button></li>`).join('')}</ul>` : '') +
+  `<details${S.tokens && !S.tokens.length ? ' open' : ''}><summary>Create a token</summary><form data-f="token" class="stack"><input class="in" name="name" required maxlength="60" placeholder="Name, for example Home Assistant" aria-label="Token name" autocomplete="off">${seg('scope', [['read', 'Read only'], ['control', 'Read and control']], S.tokScope || 'control')}<p class="err"></p><div><button class="btn pri">Create token</button></div></form></details>`);
+ setH($('s-pw'), `<h3>Your password</h3><form data-f="pw" class="stack"><input type="text" name="username" autocomplete="username" value="${esc(S.me || '')}" hidden><input class="in" type="password" name="current" required autocomplete="current-password" placeholder="Current password" aria-label="Current password"><input class="in" type="password" name="new" required minlength="8" autocomplete="new-password" placeholder="New password, at least 8 characters" aria-label="New password"><p class="err"></p><div><button class="btn">Change password</button></div></form>`);
+ const st = S.stats;
+ setH($('s-about'), `<h3>About</h3><p>Roborock at Home ${esc(app.version)}</p>${st ? `<p class="muted small num">Using ${st.rss_mb.toFixed(1)} MB of memory · running for ${esc(dur(st.uptime_s))} · ${plural(st.clients, 'page')} open</p>` : ''}<div class="row" style="justify-content:space-between;flex-wrap:wrap;margin-top:6px"><span class="muted">${S.me ? `Signed in as <b style="color:var(--ink)">${esc(S.me)}</b>` : ''}</span><button class="btn" data-a="signout">${ic('out')}Sign out</button></div>`);
+}
+async function openSettings() {
+ renderSettings();
+ const [tk, us, st, se] = await Promise.all([run(null, () => api('GET', '/api/tokens')), run(null, () => api('GET', '/api/users')), run(null, () => api('GET', '/api/stats')), run(null, () => api('GET', '/api/session'))]);
+ if (tk) S.tokens = tk;
+ if (us) S.users = us;
+ if (st) S.stats = st;
+ if (se) S.me = se.name;
+ renderSettings();
+}
+
+// ---------- Navigation ----------
+const NAV = [['robot', 'robot', 'Robot'], ['schedules', 'cal', 'Schedules'], ['activity', 'act', 'Activity'], ['settings', 'set', 'Settings']];
+$('nav').innerHTML = NAV.map(([v, i, l]) => `<button data-a="go" data-v="${v}">${ic(i)}<span>${l}</span></button>`).join('');
+function go(v) {
+ S.view = v;
+ $('app').dataset.view = v;
+ for (const sec of document.querySelectorAll('.view')) sec.hidden = sec.id !== 'v-' + v;
+ for (const b of $('nav').children) b.setAttribute('aria-current', String(b.dataset.v === v));
+ store.save();
+ if (v === 'activity') { if (S.hist) renderHist(); else if (S.app) loadHist(); }
+ if (v === 'settings' && S.app) openSettings();
+ if (v === 'schedules') renderSched();
+}
+
+// ---------- Live data ----------
+// One stream does the work: its first event is the whole state, then only patches. The last
+// state is kept in localStorage so a reopened page draws at once, before any answer arrives.
+const ACTIVE = ['cleaning', 'returning', 'paused', 'error'];
+function applyState(st, cached) {
+ S.app = st.app;
+ const ids = st.robots.map(r => r.id);
+ for (const id of [...S.robots.keys()]) if (!ids.includes(id)) { S.robots.delete(id); tabs.get(id).remove(); tabs.delete(id); maps.delete(id); loading.delete(id); paths.delete(id); S.rsel.delete(id); S.pend.delete(id); }
+ S.order = ids;
+ if (!ids.includes(S.sel)) S.sel = ids.length ? ids[0] : null;
+ // The selected robot's map is asked for first.
+ for (const r of [...st.robots].sort((a, b) => (b.id === S.sel) - (a.id === S.sel))) putRobot(r);
+ orderTabs();
+ for (const [k, el] of tabs) el.setAttribute('aria-current', String(k === S.sel));
+ S.schedules = st.schedules;
+ renderApp(); renderSel(); renderSched();
+ if (!cached) { for (const r of st.robots) if (ACTIVE.includes(r.activity)) fetchPath(r.id); keep(); }
+}
+function putRobot(r) {
+ const p = S.pend.get(r.id);
+ if (p && !p.n) S.pend.delete(r.id);
+ S.robots.set(r.id, r);
+ S.evn.set(r.id, (S.evn.get(r.id) || 0) + 1);
+ tab(R(r.id));
+ if (r.map) loadMap(r.id, r.map);
+}
+function onRobot(d) {
+ const old = S.robots.get(d.id);
+ putRobot(old ? {...old, ...d} : d);
+ if (!old) { S.order.push(d.id); orderTabs(); if (!S.sel) select(d.id); }
+ if (d.id === S.sel) renderSel();
+ keepSoon();
+}
+let keepT = 0;
+function keep() { clearTimeout(keepT); keepT = 0; store.save(); }
+const keepSoon = () => { if (!keepT) keepT = setTimeout(keep, 4000); };
+addEventListener('pagehide', keep);
+function renderApp() {
+ const app = S.app;
+ $('demoTag').hidden = !app.demo;
+ if (app.tz === null && !S.tzTried && S.es) {
+  S.tzTried = true;
+  run(null, () => api('PUT', '/api/settings', {tz: Intl.DateTimeFormat().resolvedOptions().timeZone}));
+ }
+ if (!S.sel) renderEmpty();
+ renderSettings();
+}
+function connect() {
+ const es = new EventSource('/api/events');
+ S.es = es;
+ const first = !S.live;
+ es.addEventListener('state', e => {
+  S.back = 1000; S.live = true;
+  $('conn').hidden = $('login').hidden = true; $('app').hidden = false;
+  applyState(JSON.parse(e.data));
+  if (first && !S.cachedBoot) go(S.view);
+ });
+ es.addEventListener('robot', e => onRobot(JSON.parse(e.data)));
+ es.addEventListener('path', e => onPath(JSON.parse(e.data)));
+ es.addEventListener('schedules', e => { S.schedules = JSON.parse(e.data); renderSched(); keepSoon(); });
+ es.addEventListener('app', e => { S.app = JSON.parse(e.data); renderApp(); if (!S.sel) renderSel(); renderSched(); keepSoon(); });
+ es.addEventListener('history', e => { if (S.hist) { S.hist.unshift(JSON.parse(e.data)); S.hist.length = Math.min(S.hist.length, 200); if (S.view === 'activity') renderHist(); } });
+ es.onerror = () => { if (S.es !== es) return; es.close(); S.es = null; reconnect(); };
+}
+async function reconnect() {
+ if (S.es || S.out) return;
+ // The stream cannot say why it failed; the session answers whether this is a sign-in problem.
+ let s = null;
+ try { s = await api('GET', '/api/session'); } catch (e) { if (!(e instanceof ApiError)) throw e; }
+ if (s && !s.authenticated) { signedOut(); return; }
+ $('conn').hidden = false;
+ setTimeout(() => { if (!S.es && !S.out) connect(); }, S.back);
+ S.back = Math.min(S.back * 2, 30000);
+}
+document.addEventListener('visibilitychange', () => {
+ if (document.hidden) keep(); else if (!S.es && !S.out) { S.back = 1000; connect(); }
+});
+function signedOut() {
+ S.out = true; S.live = false;
+ if (S.es) { S.es.close(); S.es = null; }
+ if (dlg.open) dlg.close();
+ $('app').hidden = true;
+ $('login').hidden = false;
+ $('lgPw').value = '';
+ keep();
+ ($('lgName').value ? $('lgPw') : $('lgName')).focus();
+}
+$('loginForm').addEventListener('submit', async e => {
+ e.preventDefault();
+ const btn = $('lgBtn'), err = $('lgErr');
+ btn.classList.add('busy'); err.textContent = '';
+ try {
+  await api('POST', '/api/login', {name: $('lgName').value.trim(), password: $('lgPw').value});
+  S.tzTried = false; S.hist = null; S.tokens = S.users = S.newTok = S.me = null; S.out = false; S.cachedBoot = false;
+  connect();
+ } catch (x) {
+  if (!(x instanceof ApiError)) throw x;
+  if (x.status === 401) err.textContent = 'That name and password do not match.';
+  else if (x.status === 429) { const s = Number(x.retry); err.textContent = `Too many tries. Wait ${s >= 90 ? plural(Math.ceil(s / 60), 'minute') : plural(s, 'second')} and try again.`; }
+  else err.textContent = x.message;
+  $('lgPw').select();
+ } finally { btn.classList.remove('busy'); }
+});
+
+// ---------- Events from the page ----------
+const ACT = {
+ go: b => go(b.dataset.v),
+ sel: b => select(b.dataset.v),
+ cmd: b => cmd(S.sel, b.dataset.c, {}, b),
+ locate: b => cmd(S.sel, 'locate', {}, b),
+ fan: b => cmd(S.sel, 'set_fan', {value: b.dataset.v}, b.parentNode),
+ water: b => cmd(S.sel, 'set_water', {value: b.dataset.v}, b.parentNode),
+ room: b => toggleRoom(Number(b.dataset.v)),
+ cbClr: () => { selOf(S.sel).clear(); roomsChanged(); },
+ rep: b => { S.repeat = Number(b.dataset.v); syncRooms(R(S.sel)); },
+ cbGo: b => cmd(S.sel, 'clean_rooms', {rooms: [...selOf(S.sel)], repeat: S.repeat}, b),
+ recentre: () => { M.user = false; home(R(S.sel), true); },
+ showpin: () => { const r = R(S.sel); if (S.view !== 'robot') go('robot'); M.user = true; focus(r.pos.x, r.pos.y, 2.4, true); },
+ schedRooms: () => openEditor(null, {robot: S.sel, rooms: new Set(selOf(S.sel))}),
+ newSched: () => openEditor(null, null),
+ editSched: b => { const s = S.schedules.find(x => x.id === b.dataset.v); if (!s) throw new Error(`No schedule ${b.dataset.v}`); openEditor(s); },
+ edSave: b => edSave(b),
+ edRun: b => run(b, async () => { await api('POST', `/api/schedules/${encodeURIComponent(ED.id)}/run`); toast('Started'); }, $('edErr')),
+ edDel: async () => {
+  const id = ED.id;
+  if (!await ask('Delete this schedule?', `${daysText(ED.days)} at ${hm(ED.time)}. This cannot be undone.`, 'Delete')) return;
+  await run(null, async () => { await api('DELETE', `/api/schedules/${encodeURIComponent(id)}`); S.schedules = S.schedules.filter(x => x.id !== id); renderSched(); toast('Schedule deleted'); });
+ },
+ close: () => dlg.close(),
+ copy: b => copy(b.dataset.t),
+ acctBack: () => { S.acct.step = 'email'; renderSettings(); renderEmpty(); },
+ unlink: async () => {
+  if (!await ask('Unlink the Roborock account?', 'The robots, their maps and their schedules are removed from this app. You can link the account again later.', 'Unlink')) return;
+  await run(null, () => api('DELETE', '/api/account'));
+ },
+ tunOff: b => run(b, () => api('PUT', '/api/tunnel', {mode: 'off'})),
+ delTok: async b => {
+  const k = S.tokens.find(x => x.id === b.dataset.v);
+  if (!await ask(`Delete the token ${k.name}?`, 'Anything using it stops working straight away.', 'Delete')) return;
+  await run(null, async () => { await api('DELETE', `/api/tokens/${encodeURIComponent(k.id)}`); S.tokens = S.tokens.filter(x => x.id !== k.id); S.newTok = null; renderSettings(); });
+ },
+ delUser: async b => {
+  const name = b.dataset.v;
+  if (!await ask(`Remove ${name}?`, 'They are signed out and can no longer sign in.', 'Remove')) return;
+  await run(null, async () => { await api('DELETE', `/api/users/${encodeURIComponent(name)}`); S.users = S.users.filter(u => u.name !== name); renderSettings(); });
+ },
+ signout: b => run(b, async () => { await api('POST', '/api/logout'); signedOut(); }),
+};
+document.addEventListener('click', e => {
+ const b = e.target.closest('[data-a]');
+ if (!b || b.disabled) return;
+ need(ACT, b.dataset.a)(b, e);
+});
+document.addEventListener('click', e => {
+ // The token scope segmented control lives in a form; it only needs to remember its value.
+ const b = e.target.closest('[data-k=scope] [data-v]');
+ if (!b) return;
+ S.tokScope = b.dataset.v;
+ for (const x of b.parentNode.children) x.setAttribute('aria-pressed', String(x === b));
+});
+document.addEventListener('change', e => {
+ const t = e.target, k = t.dataset && t.dataset.ch;
+ if (k === 'schedOn') schedOn(t);
+ if (k === 'quick') run(null, () => api('PUT', '/api/tunnel', {mode: t.checked ? 'quick' : 'off'})).then(() => renderSettings());
+});
+const FORMS = {
+ code: async (f, btn, err) => {
+  const email = f.email.value.trim();
+  if (await run(btn, () => api('POST', '/api/account/code', {email}), err)) { S.acct = {step: 'code', email}; renderSettings(); renderEmpty(); }
+ },
+ link: async (f, btn, err) => {
+  if (await run(btn, () => api('POST', '/api/account/login', {email: S.acct.email, code: f.code.value.trim()}), err)) {
+   S.acct = {step: 'email', email: ''}; toast('Account linked. Looking for robots.');
+  }
+ },
+ tz: (f, btn) => f.tz.value && run(btn, async () => { await api('PUT', '/api/settings', {tz: f.tz.value}); toast(`Time zone set to ${f.tz.value}`); }),
+ tunnel: (f, btn) => run(btn, () => api('PUT', '/api/tunnel', {mode: 'token', token: f.token.value.trim()}), $('tunErr')),
+ user: async (f, btn, err) => {
+  const name = f.name.value.trim();
+  if (await run(btn, () => api('POST', '/api/users', {name, password: f.password.value}), err)) {
+   toast(`${name} can now sign in`);
+   S.users = await api('GET', '/api/users'); renderSettings();
+  }
+ },
+ token: async (f, btn, err) => {
+  const name = f.name.value.trim(), scope = S.tokScope || 'control';
+  const res = await run(btn, () => api('POST', '/api/tokens', {name, scope}), err);
+  if (res) { S.newTok = {name, token: res.token}; S.tokens = await api('GET', '/api/tokens'); renderSettings(); }
+ },
+ pw: async (f, btn, err) => {
+  if (await run(btn, () => api('POST', '/api/password', {current: f.current.value, new: f.new.value}), err)) { f.reset(); toast('Password changed. Your other devices were signed out.'); }
+ },
+};
+document.addEventListener('submit', e => {
+ const f = e.target, k = f.dataset.f;
+ if (!k) return;
+ e.preventDefault();
+ need(FORMS, k)(f, e.submitter || f.querySelector('button:not([type=button])'), f.querySelector('.err'));
+});
+DM.addEventListener('change', () => { if (S.sel) renderSel(); });
+setInterval(() => { if (S.view === 'schedules') renderSched(); else if (S.view === 'robot' && S.sel) renderSel(); }, 30000);
+
+// ---------- Start ----------
+$('fab').innerHTML = ic('target');
+$('dockm').firstChild.innerHTML = ic('bolt');
+$('cbClr').innerHTML = ic('x');
+$('locBtn').innerHTML = `${ic('loc')}Locate`;
+$('locBtn').title = 'Plays a sound so you can find it';
+const saved = store.get();
+S.sel = saved.sel || null;
+if (saved.st) { S.cachedBoot = true; applyState(saved.st, true); }
+go(VIEWS.includes(saved.view) ? saved.view : 'robot');
+connect();
+</script>
+</body>
+</html>

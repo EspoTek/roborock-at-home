@@ -1,0 +1,13 @@
+{
+  "name": "Roborock at Home",
+  "short_name": "Roborock",
+  "description": "Control your Roborock robot vacuums at home.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f2f0eb",
+  "theme_color": "#f2f0eb",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}

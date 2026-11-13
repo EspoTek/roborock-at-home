@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+.DS_Store
+# never commit a real home: local data dirs and captured maps stay out
+/data/
+/private/
+*.bin
