@@ -64,7 +64,37 @@ uvx --from https://github.com/EspoTek/roborock-at-home/archive/master.tar.gz rob
 
 ## Speed and size
 
-Measurements are being taken on the reference machine and will replace this line.
+Measured on the machine it was built for, an old laptop with a 1.1 GHz
+dual-core Celeron N3350, running two real robots:
+
+| | |
+|---|---|
+| Any request the page makes (state, the page itself, a "not modified") | 2 ms median, 3.3 ms at the 99th percentile, client included |
+| The same on a current laptop | 0.15 ms |
+| The page | one file, 28 kB compressed, then cached |
+| Everything about two robots (`/api/state`) | 1.1 kB compressed |
+| A live update (one robot's battery, position or state) | about 120 bytes |
+| Sent while nothing is happening | nothing, bar a keep-alive every 25 s |
+| Switching between robots in the page | no request at all, 1 to 3 ms |
+| Parsing a real 373 x 567 map | 3 ms (the usual parser: 210 ms or more) |
+| Memory, app with real robots | about 65 MB |
+| Memory, with remote access on (adds `cloudflared`) | about 100 MB in total |
+| Memory, demo | 30 to 45 MB |
+| Processor when idle, tunnel included | 1.3% of one core |
+
+Most of the app's memory is the Roborock library; the app's own code adds a
+couple of megabytes. At about 100 MB all in, it leaves plenty of room on a
+512 MB Raspberry Pi, though it has not been run on one yet.
+
+How it stays quick:
+
+- Nothing you tap waits on a robot or a cloud. The server already holds every
+  robot's state and map; reads are answered from memory, as bytes prepared when
+  the data last changed.
+- The page keeps every robot's map ready, so opening a robot is instant, and
+  it remembers the last state, so reopening the page paints at once.
+- Buttons act immediately and show the result; the command goes to the robot
+  behind them and you only hear about it if it fails.
 
 ## Signing in
 
