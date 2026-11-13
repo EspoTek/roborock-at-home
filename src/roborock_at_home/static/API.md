@@ -65,7 +65,7 @@ The whole picture in one small response. Supports `If-None-Match`.
 {
   "rev": 412,
   "app": {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "demo": false,
     "tz": "Australia/Melbourne",
     "account": {"linked": true, "email": "y***@example.com", "problem": null},
