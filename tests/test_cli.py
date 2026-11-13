@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from roborock_at_home import __version__, cli
+from roborock_at_home import cli
 from roborock_at_home.config import Config
 
 
@@ -171,7 +171,7 @@ def test_serve_without_config(tmp_path: Path, capsys: pytest.CaptureFixture[str]
 def test_version(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit):
         cli.main(["--version"])
-    assert capsys.readouterr().out.strip() == f"roborock-at-home {__version__}"
+    assert capsys.readouterr().out.strip() == "roborock-at-home 0.1.0"
 
 
 def test_demo_serves_and_stops_cleanly(tmp_path: Path) -> None:
