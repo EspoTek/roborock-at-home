@@ -108,6 +108,31 @@ def test_users(tmp_path: Path) -> None:
         config.user("admin")
 
 
+def test_theme(tmp_path: Path) -> None:
+    config = make(tmp_path)
+    ann = config.add_user("ann", "password1", NOW)
+    assert config.user("admin").theme == "system" and ann.theme == "system"
+    assert config.set_theme("ANN", "dark") is ann
+    with pytest.raises(Invalid):
+        config.set_theme("ann", "blue")
+    with pytest.raises(NotFound):
+        config.set_theme("nobody", "dark")
+    config.save()
+    loaded = Config.load(config.data_dir)
+    assert [(u.name, u.theme) for u in loaded.users] == [("admin", "system"), ("ann", "dark")]
+
+    # Every person has a theme on disk: a file without one, or with a made-up one, does not load.
+    data = json.loads(config.config_file.read_text())
+    data["users"][1]["theme"] = "blue"
+    config.config_file.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="unknown theme"):
+        Config.load(config.data_dir)
+    del data["users"][1]["theme"]
+    config.config_file.write_text(json.dumps(data))
+    with pytest.raises(KeyError):
+        Config.load(config.data_dir)
+
+
 def test_sessions(tmp_path: Path) -> None:
     config = make(tmp_path)
     ann = config.add_user("ann", "password1", NOW)

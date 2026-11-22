@@ -50,6 +50,8 @@ _ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz"
 _ROBOT_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
 _TOKEN_SCOPES = ("read", "control")
 _TUNNEL_MODES = ("off", "quick", "token")
+# How the app looks to one person: "system" follows their device.
+THEMES = ("system", "light", "dark")
 
 
 class Invalid(ValueError):
@@ -183,6 +185,8 @@ class User:
     # everywhere. Starts random, so a person removed and added again under the
     # same name does not revive the old cookies.
     generation: int
+    # One of THEMES. Kept with the person, so it follows them to every device.
+    theme: str
 
     @property
     def key(self) -> str:
@@ -272,7 +276,7 @@ class Config:
             raise FileExistsError(f"{config.config_file} already exists")
         config.session_secret = secrets.token_bytes(32)
         config.users.append(
-            User(clean_name(first_user), hash_password(password), now, secrets.randbelow(2**31))
+            User(clean_name(first_user), hash_password(password), now, secrets.randbelow(2**31), "system")
         )
         config.save()
         return config
@@ -291,10 +295,14 @@ class Config:
         stat = self.config_file.stat()
         data = json.loads(self.config_file.read_bytes())
         self.users = [
-            User(u["name"], u["password"], u["created"], u["generation"]) for u in data["users"]
+            User(u["name"], u["password"], u["created"], u["generation"], u["theme"])
+            for u in data["users"]
         ]
         if not self.users:
             raise ValueError(f"{self.config_file} has no users")
+        for user in self.users:
+            if user.theme not in THEMES:
+                raise ValueError(f"{self.config_file}: unknown theme {user.theme!r} for {user.name}")
         self.session_secret = bytes.fromhex(data["session_secret"])
         self.tokens = [
             Token(t["id"], t["name"], t["scope"], t["created"], t["last_used"], t["sha256"])
@@ -324,7 +332,13 @@ class Config:
     def _to_json(self) -> dict:
         return {
             "users": [
-                {"name": u.name, "password": u.password, "created": u.created, "generation": u.generation}
+                {
+                    "name": u.name,
+                    "password": u.password,
+                    "created": u.created,
+                    "generation": u.generation,
+                    "theme": u.theme,
+                }
                 for u in self.users
             ],
             "session_secret": self.session_secret.hex(),
@@ -390,8 +404,15 @@ class Config:
         check_new_password(password)
         if self.user_or_none(name) is not None:
             raise Invalid(f"{name} can already sign in.")
-        user = User(name, hash_password(password), now, secrets.randbelow(2**31))
+        user = User(name, hash_password(password), now, secrets.randbelow(2**31), "system")
         self.users.append(user)
+        return user
+
+    def set_theme(self, name: str, theme: str) -> User:
+        if theme not in THEMES:
+            raise Invalid(f"The theme is one of {', '.join(THEMES)}.")
+        user = self.user(name)
+        user.theme = theme
         return user
 
     def set_password(self, name: str, password: str) -> User:

@@ -71,7 +71,7 @@ dual-core Celeron N3350, running two real robots:
 |---|---|
 | Any request the page makes (state, the page itself, a "not modified") | 2 ms median, 3.3 ms at the 99th percentile, client included |
 | The same on a current laptop | 0.15 ms |
-| The page | one file, 34 kB compressed, then cached |
+| The page | one file, 35 kB compressed, then cached |
 | Everything about two robots (`/api/state`) | 1.1 kB compressed |
 | A live update (one robot's battery, position or state) | about 120 bytes |
 | Sent while nothing is happening | nothing, bar a keep-alive every 25 s |

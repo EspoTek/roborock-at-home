@@ -375,6 +375,7 @@ class Server:
                     "kind": who.kind,
                     "scope": who.scope,
                     "name": None if who.user is None else who.user.name,
+                    "theme": None if who.user is None else who.user.theme,
                 }
             )
         )
@@ -610,6 +611,15 @@ class Server:
         return json_response(_OK)
 
     @api("all", session_only=True)
+    async def me(self, request: web.Request, who: Who | None) -> web.Response:
+        assert who is not None and who.user is not None
+        body = await read_json(request)
+        _only(body, {"theme"})
+        self.config.set_theme(who.user.name, _text(body, "theme"))
+        await self.save_config()
+        return json_response(_OK)
+
+    @api("all", session_only=True)
     async def password(self, request: web.Request, who: Who | None) -> web.Response:
         assert who is not None and who.user is not None
         body = await read_json(request)
@@ -800,6 +810,7 @@ def create_app(
     r.add_get("/api/history", server.history)
     r.add_get("/api/stats", server.stats)
     r.add_put("/api/settings", server.settings)
+    r.add_put("/api/me", server.me)
     r.add_post("/api/password", server.password)
     r.add_get("/api/users", server.users)
     r.add_post("/api/users", server.user_add)

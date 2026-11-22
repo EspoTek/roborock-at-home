@@ -168,10 +168,10 @@ async def test_stats(env: Env) -> None:
 async def test_session_endpoint(env: Env) -> None:
     assert await (await env.call("GET", "/api/session")).json() == {"authenticated": False}
     assert await (await env.call("GET", "/api/session", "session")).json() == {
-        "authenticated": True, "kind": "session", "scope": "all", "name": "admin",
+        "authenticated": True, "kind": "session", "scope": "all", "name": "admin", "theme": "system",
     }
     assert await (await env.call("GET", "/api/session", "read")).json() == {
-        "authenticated": True, "kind": "token", "scope": "read", "name": None,
+        "authenticated": True, "kind": "token", "scope": "read", "name": None, "theme": None,
     }
     bad = await env.call("GET", "/api/session", headers={"Authorization": "Bearer rah_nope"})
     assert await bad.json() == {"authenticated": False}
@@ -501,6 +501,26 @@ async def test_users(env: Env) -> None:
     admin_cookie, env.cookie = env.cookie, ann_cookie
     assert (await env.call("GET", "/api/users", "session")).status == 401  # ann is signed out
     env.cookie = admin_cookie
+
+
+async def test_theme_is_kept_per_person(env: Env) -> None:
+    await env.call("POST", "/api/users", "session", {"name": "ann", "password": "password1"})
+    resp = await env.call("PUT", "/api/me", "session", {"theme": "dark"})
+    assert resp.status == 200 and await resp.json() == {"ok": True}
+    assert (await (await env.call("GET", "/api/session", "session")).json())["theme"] == "dark"
+    assert Config.load(env.config.data_dir).user("admin").theme == "dark"  # saved, not only in memory
+
+    login = await env.call("POST", "/api/login", body={"name": "ann", "password": "password1"})
+    admin_cookie, env.cookie = env.cookie, login.cookies[SESSION_COOKIE].value
+    assert (await (await env.call("GET", "/api/session", "session")).json())["theme"] == "system"
+    assert (await env.call("PUT", "/api/me", "session", {"theme": "light"})).status == 200
+    env.cookie = admin_cookie
+    assert (await (await env.call("GET", "/api/session", "session")).json())["theme"] == "dark"
+
+    for body in ({"theme": "blue"}, {"theme": 1}, {}, {"theme": "light", "name": "x"}):
+        resp = await env.call("PUT", "/api/me", "session", body)
+        assert resp.status == 400, body
+    assert (await env.call("PUT", "/api/me", "control", {"theme": "light"})).status == 403  # a token has no look
 
 
 async def test_tokens(env: Env) -> None:

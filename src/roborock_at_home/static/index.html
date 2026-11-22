@@ -4,13 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Roborock at Home</title>
-<meta name="theme-color" content="#f5f6f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#141719" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f5">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
+<script>
+// Each person chooses a look (system, light or dark) and the app keeps it with their account.
+// This browser's copy of the last answer only lets the page paint in that look straight away.
+const HT = document.documentElement, DM = matchMedia('(prefers-color-scheme: dark)');
+function look(t) {
+ const dark = t === 'dark' || t === 'system' && DM.matches;
+ HT.dataset.look = t;
+ HT.dataset.theme = dark ? 'dark' : 'light';
+ document.querySelector('meta[name=theme-color]').content = dark ? '#141719' : '#f5f6f5';
+}
+{ let t = null; try { t = localStorage.getItem('rahLook'); } catch (e) { /* storage blocked: follow the device */ } look(t || 'system'); }
+</script>
 <style>
-:root{color-scheme:light dark;--bg:#f5f6f5;--map:#ecefed;--sf:#fff;--sf2:#e9edeb;--on:#fff;--ink:#20282c;--ink2:#566269;--ink3:#5c686e;--line:#cbd3cf;--ac:#086b5c;--acI:#fff;--acS:#dcefe9;--wn:#a83d13;--wnI:#fff;--wnS:#fff0e7;--hover:#e1e8e4;--sh:0 2px 5px rgba(20,32,28,.07),0 12px 32px rgba(20,32,28,.12);--f:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif}
-@media (prefers-color-scheme:dark){:root{--bg:#141719;--map:#1b2024;--sf:#20262a;--sf2:#2b3338;--on:#39454c;--ink:#eef2f4;--ink2:#b3c0c7;--ink3:#9aa9b1;--line:#48565e;--ac:#64d9c0;--acI:#102b25;--acS:#203f38;--wn:#ffac80;--wnI:#34180a;--wnS:#39271e;--hover:#344149;--sh:0 2px 5px rgba(0,0,0,.2),0 12px 32px rgba(0,0,0,.3)}}
+:root{color-scheme:light;--bg:#f5f6f5;--map:#ecefed;--sf:#fff;--sf2:#e9edeb;--on:#fff;--ink:#20282c;--ink2:#566269;--ink3:#5c686e;--line:#cbd3cf;--ac:#086b5c;--acI:#fff;--acS:#dcefe9;--wn:#a83d13;--wnI:#fff;--wnS:#fff0e7;--hover:#e1e8e4;--sh:0 2px 5px rgba(20,32,28,.07),0 12px 32px rgba(20,32,28,.12);--f:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif}
+[data-theme=dark]{color-scheme:dark;--bg:#141719;--map:#1b2024;--sf:#20262a;--sf2:#2b3338;--on:#39454c;--ink:#eef2f4;--ink2:#b3c0c7;--ink3:#9aa9b1;--line:#48565e;--ac:#64d9c0;--acI:#102b25;--acS:#203f38;--wn:#ffac80;--wnI:#34180a;--wnS:#39271e;--hover:#344149;--sh:0 2px 5px rgba(0,0,0,.2),0 12px 32px rgba(0,0,0,.3)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0}
@@ -125,7 +136,7 @@ main{grid-area:main;min-height:0;position:relative}
 .ht{stroke:var(--wn);stroke-opacity:.4;stroke-width:1}
 .vw{stroke:var(--wn);stroke-width:calc(2.5px / var(--z,1));stroke-linecap:round}
 .pl{fill:none;stroke:var(--ac);stroke-width:calc(1.5px / var(--z,1));stroke-opacity:.6;stroke-linejoin:round;stroke-linecap:round}
-@media (prefers-color-scheme:dark){.pl{stroke:var(--ink);stroke-opacity:.7}}
+[data-theme=dark] .pl{stroke:var(--ink);stroke-opacity:.7}
 .mk{position:absolute;left:0;top:0;pointer-events:none;will-change:transform}
 .lbl{position:absolute;left:0;top:0;white-space:nowrap;font-size:12px;font-weight:500;color:var(--ink);pointer-events:none;transition:opacity .15s}
 .lbl.on{font-weight:700}
@@ -390,7 +401,7 @@ dialog::backdrop{background:rgba(8,10,9,.45)}
   <section id="v-schedules" class="view page" hidden><div class="pg"><div class="pg-h"><h2>Schedules</h2><button class="btn pri" data-a="newSched" id="newSched"></button></div><div id="schedNote" class="note" hidden></div><div id="schedList" class="scs"></div></div></section>
   <section id="v-activity" class="view page" hidden><div class="pg"><h2>Activity</h2><div id="hist" class="tl"></div></div></section>
   <section id="v-settings" class="view page" hidden><div class="pg"><h2>Settings</h2><div class="sets">
-   <div class="set" id="s-acct"></div><div class="set" id="s-tz"></div><div class="set" id="s-remote"></div><div class="set" id="s-people"></div><div class="set" id="s-tokens"></div><div class="set" id="s-pw"></div><div class="set" id="s-about"></div>
+   <div class="set" id="s-acct"></div><div class="set" id="s-look"></div><div class="set" id="s-tz"></div><div class="set" id="s-remote"></div><div class="set" id="s-people"></div><div class="set" id="s-tokens"></div><div class="set" id="s-pw"></div><div class="set" id="s-about"></div>
   </div></div></section>
  </main>
 </div>
@@ -401,7 +412,7 @@ dialog::backdrop{background:rgba(8,10,9,.45)}
 'use strict';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
-const DM = matchMedia('(prefers-color-scheme: dark)'), RM = matchMedia('(prefers-reduced-motion: reduce)');
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
 // Icons: one 24 px grid, one stroke (set in CSS).
 const P = {
  robot: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="9.2" r="2.6"/><path d="M8.6 15.8h6.8"/>',
@@ -586,7 +597,7 @@ const ROOM_PALETTE = {
   {"normal":[119,75,96],"hover":[125,78,100],"selected":[131,79,104],"edge":[225,157,188]},
  ]},
 };
-const tone = () => need(ROOM_PALETTE, DM.matches ? 'dark' : 'light');
+const tone = () => need(ROOM_PALETTE, HT.dataset.theme);
 // ---------- Which slot each room gets: rooms that share a wall are kept far apart ----------
 // sRGB (0-255) to OKLab, where straight-line distance tracks how different two colours look.
 const lin = c => (c /= 255) <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
@@ -742,7 +753,7 @@ function showMap() {
 function paint(id) {
  const e = maps.get(id);
  if (!e) return;
- const r = R(id), sel = selOf(id), hov = M.id === id ? M.hov : null, key = `${DM.matches}|${[...sel]}|${hov}|${r.rooms.map(m => m.id)}`;
+ const r = R(id), sel = selOf(id), hov = M.id === id ? M.hov : null, key = `${HT.dataset.theme}|${[...sel]}|${hov}|${r.rooms.map(m => m.id)}`;
  if (e.key === key) return;
  e.key = key;
  const T = tone(), L = new Uint32Array(256), E = new Uint32Array(256);
@@ -1087,7 +1098,7 @@ function renderSel() {
   acts.innerHTML = list.map((c, i) => `<button class="btn ${i ? 'secondary' : 'pri big'}" data-a="cmd" data-c="${c}" aria-label="${ACTL[c][1]}" title="${ACTL[c][1]}">${ic(ACTL[c][0])}<span>${ACTL[c][1]}</span></button>`).join('');
  }
  // Rooms
- const chips = $('chips'), ck = JSON.stringify([r.id, r.rooms, DM.matches, maps.has(r.id) && maps.get(r.id).rev]);
+ const chips = $('chips'), ck = JSON.stringify([r.id, r.rooms, HT.dataset.theme, maps.has(r.id) && maps.get(r.id).rev]);
  if (chips._k !== ck) {
   chips._k = ck;
   chips.innerHTML = r.rooms.map(m => chip(r, m, false, 'data-a="room"')).join('');
@@ -1343,6 +1354,7 @@ function renderSettings() {
  if (S.view !== 'settings' || !S.app) return;
  const app = S.app, t = app.tunnel;
  setH($('s-acct'), `<h3>Roborock account</h3>${acctHTML()}`);
+ setH($('s-look'), `<h3>Appearance</h3><p class="muted">Your choice is kept with your account, so it follows you to every device you sign in on.</p>${seg('look', [['system', 'Match device'], ['light', 'Light'], ['dark', 'Dark']], HT.dataset.look)}`);
  if (!TZS) TZS = Intl.supportedValuesOf('timeZone');
  const tz = app.tz;
  setH($('s-tz'), `<h3>Time zone</h3><p class="muted">Schedules run in this time zone.</p><form data-f="tz" class="row"><select class="in" name="tz" aria-label="Time zone">${tz ? '' : '<option value="">Not set</option>'}${TZS.map(z => `<option${z === tz ? ' selected' : ''}>${z}</option>`).join('')}</select><button class="btn">Save</button></form>`);
@@ -1364,13 +1376,26 @@ function renderSettings() {
  const st = S.stats;
  setH($('s-about'), `<h3>About</h3><p>Roborock at Home ${esc(app.version)}</p>${st ? `<p class="muted small num">Using ${st.rss_mb.toFixed(1)} MB of memory · running for ${esc(dur(st.uptime_s))} · ${plural(st.clients, 'page')} open</p>` : ''}<div class="row" style="justify-content:space-between;flex-wrap:wrap;margin-top:6px"><span class="muted">${S.me ? `Signed in as <b style="color:var(--ink)">${esc(S.me)}</b>` : ''}</span><button class="btn" data-a="signout">${ic('out')}Sign out</button></div>`);
 }
+function setLook(t) {
+ look(t);
+ try { localStorage.setItem('rahLook', t); } catch (e) { /* storage blocked: the account still has it */ }
+ if (S.sel) renderSel();
+ renderSettings();
+}
+// Who is signed in, and the look they chose. Asked when the live stream first answers (so only
+// once the app is reachable and signed in) and again when Settings opens.
+async function whoami() {
+ const se = await run(null, () => api('GET', '/api/session'));
+ if (!se || !se.authenticated) return;
+ S.me = se.name;
+ setLook(se.theme);
+}
 async function openSettings() {
  renderSettings();
- const [tk, us, st, se] = await Promise.all([run(null, () => api('GET', '/api/tokens')), run(null, () => api('GET', '/api/users')), run(null, () => api('GET', '/api/stats')), run(null, () => api('GET', '/api/session'))]);
+ const [tk, us, st] = await Promise.all([run(null, () => api('GET', '/api/tokens')), run(null, () => api('GET', '/api/users')), run(null, () => api('GET', '/api/stats')), whoami()]);
  if (tk) S.tokens = tk;
  if (us) S.users = us;
  if (st) S.stats = st;
- if (se) S.me = se.name;
  renderSettings();
 }
 
@@ -1443,6 +1468,7 @@ function connect() {
   S.back = 1000; S.live = true;
   $('conn').hidden = $('login').hidden = true; $('app').hidden = false;
   applyState(JSON.parse(e.data));
+  if (first) whoami();
   if (first && !S.cachedBoot) go(S.view);
  });
  es.addEventListener('robot', e => onRobot(JSON.parse(e.data)));
@@ -1552,6 +1578,13 @@ document.addEventListener('click', e => {
  S.tokScope = b.dataset.v;
  for (const x of b.parentNode.children) x.setAttribute('aria-pressed', String(x === b));
 });
+document.addEventListener('click', async e => {
+ const b = e.target.closest('[data-k=look] [data-v]');
+ if (!b) return;
+ const was = HT.dataset.look;
+ setLook(b.dataset.v);
+ if (!await run(null, () => api('PUT', '/api/me', {theme: b.dataset.v}))) setLook(was);
+});
 document.addEventListener('change', e => {
  const t = e.target, k = t.dataset && t.dataset.ch;
  if (k === 'schedOn') schedOn(t);
@@ -1591,7 +1624,7 @@ document.addEventListener('submit', e => {
  e.preventDefault();
  need(FORMS, k)(f, e.submitter || f.querySelector('button:not([type=button])'), f.querySelector('.err'));
 });
-DM.addEventListener('change', () => { if (S.sel) renderSel(); });
+DM.addEventListener('change', () => setLook(HT.dataset.look));
 setInterval(() => { if (S.view === 'schedules') renderSched(); else if (S.view === 'robot' && S.sel) renderSel(); }, 30000);
 
 // ---------- Start ----------

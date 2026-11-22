@@ -285,7 +285,7 @@ Newest first, at most 200 kept.
 |---|---|---|
 | `GET /healthz` | none | `ok` |
 | `GET /api/docs` | none | this file |
-| `GET /api/session` | none | `{"authenticated": true, "kind": "session", "scope": "all", "name": "you@example.com"}` (`name` is `null` for a token; not signed in: `{"authenticated": false}`) |
+| `GET /api/session` | none | `{"authenticated": true, "kind": "session", "scope": "all", "name": "you@example.com", "theme": "system"}` (`name` and `theme` are `null` for a token; not signed in: `{"authenticated": false}`) |
 | `GET /api/stats` | `read` | `{"rss_mb": 41.2, "uptime_s": 86400, "clients": 1, "robots": 2}` |
 
 ## Session-only endpoints
@@ -297,6 +297,7 @@ Used by the Settings page. A bearer token gets `403 forbidden`.
 | `POST /api/login` | `{"name": "you@example.com", "password": "..."}` | sets the cookie; `{"ok": true}`. A wrong name and a wrong password give the same 401. |
 | `POST /api/logout` | | |
 | `PUT /api/settings` | `{"tz": "Australia/Melbourne"}` | an IANA zone |
+| `PUT /api/me` | `{"theme": "dark"}` | how the app looks to you: `system` (follow the device), `light` or `dark`. Kept with your account, so it applies wherever you sign in; `GET /api/session` reports it. |
 | `POST /api/password` | `{"current": "...", "new": "..."}` | your own password; at least 8 characters; signs out your other sessions |
 | `GET /api/users` | | `[{"name": "you@example.com", "created": 1794563000, "you": true}]` |
 | `POST /api/users` | `{"name": "them@example.com", "password": "..."}` | add a person (name 1-100 characters, unique; password at least 8) |
