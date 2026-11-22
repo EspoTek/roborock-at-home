@@ -125,12 +125,19 @@ The whole picture in one small response. Supports `If-None-Match`.
   in a row, or 90 seconds). Everything else then shows the last values it
   reported.
 - `link`: `local` (talking over the LAN), `cloud`, or `none`.
-- `battery`, `fan`, `water`, `clean`, `map`, `pos` are `null` until first
-  known. `water_options` is empty on a robot that cannot mop.
+- `battery`, `charging`, `fan`, `water`, `clean`, `map`, `pos` and `seen` are
+  `null` until first known. `water_options` is empty on a robot that cannot
+  mop. Inside `clean`, either of `area_m2` and `seconds` is `null` when the
+  robot has not reported it; `map.charger` is `null` on a map with no dock.
+- `rooms` is every area of the robot's map that can be cleaned on its own: the
+  rooms named in the Roborock app, then any area without a name there, listed
+  as `Unnamed room` (`Unnamed room 2`, and so on). `clean_rooms` takes the `id`
+  of either kind.
 - `error`: `null` or `{"code": 5, "label": "Main brush jammed"}`.
 - `pos` is the **last known position**. `live` is `true` while the robot is
   reachable and the position came from its latest map; `false` once it is
-  stale. `ts` is when it was read; `room` is the room it was in, or `null`.
+  stale. `ts` is when it was read; `room` is the room it was in, or `null`;
+  `angle` is `null` when the robot did not report a heading.
 - The path of the current job is not part of the robot object: see `/path`
   and the `path` event.
 - `seen` is when the robot last answered. It moves only when something else
@@ -158,7 +165,8 @@ The whole picture in one small response. Supports `If-None-Match`.
 | `low_battery` | 15% or less, not charging and not on its way back. That includes a robot sitting on a dock that is not charging it. |
 
 `summary` is one ready-made sentence in the app's time zone. With `pos`, this
-answers "where is it?" after it has died somewhere.
+answers "where is it?" after it has died somewhere. `room` is `null` when the
+robot was not in a room, or its position was never known.
 
 ### `GET /api/robots`, `GET /api/robots/{id}`
 
@@ -295,12 +303,12 @@ Used by the Settings page. A bearer token gets `403 forbidden`.
 | Request | Body | |
 |---|---|---|
 | `POST /api/login` | `{"name": "you@example.com", "password": "..."}` | sets the cookie; `{"ok": true}`. A wrong name and a wrong password give the same 401. |
-| `POST /api/logout` | | |
+| `POST /api/logout` | | `{"ok": true}`; a 401 when nobody is signed in |
 | `PUT /api/settings` | `{"tz": "Australia/Melbourne"}` | an IANA zone |
 | `PUT /api/me` | `{"theme": "dark"}` | how the app looks to you: `system` (follow the device), `light` or `dark`. Kept with your account, so it applies wherever you sign in; `GET /api/session` reports it. |
 | `POST /api/password` | `{"current": "...", "new": "..."}` | your own password; at least 8 characters; signs out your other sessions |
 | `GET /api/users` | | `[{"name": "you@example.com", "created": 1794563000, "you": true}]` |
-| `POST /api/users` | `{"name": "them@example.com", "password": "..."}` | add a person (name 1-100 characters, unique; password at least 8) |
+| `POST /api/users` | `{"name": "them@example.com", "password": "..."}` | add a person (name 1-100 characters, unique; password at least 8); returns them as `GET /api/users` lists them |
 | `DELETE /api/users/{name}` | | remove a person and sign them out. Not yourself (`bad_request`). |
 | `GET /api/tokens` | | `[{"id": "t_1a2b", "name": "Agent", "scope": "control", "created": 1794563000, "last_used": null}]` |
 | `POST /api/tokens` | `{"name": "Agent", "scope": "control"}` | `{"id": "t_1a2b", "token": "rah_..."}`, shown once |

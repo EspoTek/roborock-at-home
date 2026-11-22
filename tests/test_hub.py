@@ -450,6 +450,46 @@ async def test_commands_are_checked(tmp_path: Path) -> None:
     assert await code("r1", Command("start")) == "robot_unreachable"
 
 
+async def test_areas_without_a_name_are_rooms_too(tmp_path: Path) -> None:
+    hub, backend, _ = await make_hub(tmp_path)
+    hub.robot_status("r1", DOCKED)
+    assert robot_json(hub)["rooms"] == [{"id": 16, "name": "Kitchen"}, {"id": 17, "name": "Hall"}]
+
+    # The map has two areas the Roborock app has no name for: the robot can clean them all the same.
+    base = frame()
+    spare = RoomGeom(2.5, 3.5, 1, 1, 4, 6, 24)
+    queue = hub.subscribe()
+    await send_map(hub, replace(base, digest="bbbb2222", rooms={**base.rooms, 21: spare, 19: spare}))
+    listed = [
+        {"id": 16, "name": "Kitchen"},
+        {"id": 17, "name": "Hall"},
+        {"id": 19, "name": "Unnamed room"},
+        {"id": 21, "name": "Unnamed room 2"},
+    ]
+    assert robot_json(hub)["rooms"] == listed
+    patches = [data for event, data in drain(queue) if event == "robot"]
+    assert any(patch.get("rooms") == listed for patch in patches)  # the page hears about it with the map
+
+    await hub.command("r1", Command("clean_rooms", rooms=(19, 16)))
+    assert backend.commands[-1][1].rooms == (19, 16)
+    with pytest.raises(RobotError):
+        await hub.command("r1", Command("clean_rooms", rooms=(20,)))
+
+    # Naming one in the app moves it to the named rooms; the other keeps the plain label.
+    hub.robot_rooms("r1", [*ROOMS, Room(21, "Study")])
+    assert robot_json(hub)["rooms"] == [*listed[:2], {"id": 21, "name": "Study"}, {"id": 19, "name": "Unnamed room"}]
+
+    # Only the names are saved; the unnamed areas come back from the saved map.
+    await hub.stop()
+    saved = json.loads((tmp_path / "robots.json").read_text())[0]
+    assert saved["rooms"] == [[16, "Kitchen"], [17, "Hall"], [21, "Study"]]
+    again = Hub(tmp_path, app_info=app_info, clock=Clock())
+    again.set_tz("Australia/Melbourne")
+    again.load()
+    assert [room["id"] for room in robot_json(again)["rooms"]] == [16, 17, 21, 19]
+    await again.stop()
+
+
 async def test_watchers_drive_the_backend_with_grace(tmp_path: Path) -> None:
     hub, backend, _ = await make_hub(tmp_path)
     assert backend.watched == [False]

@@ -98,7 +98,7 @@ class Robot:
     seen: int | None = None  # last successful read
     last_ok: float | None = None  # same, as a clock value, for the 90 s rule
     failures: int = 0  # failed reads in a row
-    rooms: tuple[Room, ...] = ()
+    named: tuple[Room, ...] = ()  # the rooms that have a name in the Roborock app
     geom: MapFrame | None = None  # the parsed map with an empty index
     map_gz: bytes | None = None  # the index, gzipped: what map.bin serves
     map_json: dict | None = None
@@ -116,6 +116,21 @@ class Robot:
     parsing: bool = False
     pending_map: bytes | None = None
     offline_timer: asyncio.TimerHandle | None = None
+
+    @property
+    def rooms(self) -> tuple[Room, ...]:
+        """Every room a person can pick: the named ones, then each area of the
+        map that nobody has named in the Roborock app. The robot cleans an area
+        by its id whether or not it has a name, so leaving these out would put
+        part of the home beyond reach of "clean this room"."""
+        if self.geom is None:
+            return self.named
+        named = {room.id for room in self.named}
+        spare = sorted(room_id for room_id in self.geom.rooms if room_id not in named)
+        return self.named + tuple(
+            Room(room_id, "Unnamed room" if n == 0 else f"Unnamed room {n + 1}")
+            for n, room_id in enumerate(spare)
+        )
 
     def room_name_or_none(self, room_id: int | None) -> str | None:
         for room in self.rooms:
@@ -315,9 +330,9 @@ class Hub:
 
     def robot_rooms(self, robot_id: str, rooms: list[Room]) -> None:
         robot = self._known(robot_id)
-        rooms_t = tuple(rooms)
-        if rooms_t != robot.rooms:
-            robot.rooms = rooms_t
+        named = tuple(rooms)
+        if named != robot.named:
+            robot.named = named
             self._refresh(robot)
 
     def robot_map(self, robot_id: str, raw: bytes) -> None:
@@ -967,7 +982,7 @@ def _robot_to_json(robot: Robot) -> dict:
         "info": {"id": info.id, "name": info.name, "model": info.model, "model_name": info.model_name},
         "obs": None if robot.obs is None else _obs_to_json(robot.obs),
         "seen": robot.seen,
-        "rooms": [[room.id, room.name] for room in robot.rooms],
+        "rooms": [[room.id, room.name] for room in robot.named],
         "map": None if robot.geom is None else _geom_to_json(robot.geom),
         "pos": pos,
         "path": list(robot.path),
@@ -983,7 +998,7 @@ def _robot_from_json(rec: dict) -> Robot:
     robot = Robot(RobotInfo(check_robot_id(info["id"]), info["name"], info["model"], info["model_name"]))
     robot.obs = None if rec["obs"] is None else _obs_from_json(rec["obs"])
     robot.seen = rec["seen"]
-    robot.rooms = tuple(Room(room_id, name) for room_id, name in rec["rooms"])
+    robot.named = tuple(Room(room_id, name) for room_id, name in rec["rooms"])
     if rec["map"] is not None:
         robot.geom = _geom_from_json(rec["map"])
         robot.map_json = _map_json(robot.geom)

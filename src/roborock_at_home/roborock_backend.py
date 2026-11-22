@@ -428,15 +428,15 @@ def command_request(
     command: Command,
     *,
     in_cleaning: int | None,
-    rooms: frozenset[int],
     fan_codes: Mapping[str, int],
     water_codes: Mapping[str, int],
 ) -> tuple[RoborockCommand, list[Any] | None]:
     """The RoborockCommand and params for a Command, or RobotError.
 
     `in_cleaning` is the last status's interrupted-job kind (None before the
-    first read), `rooms` the segment ids of the last room list, the codes
-    the robot's offered levels (`level_codes`).
+    first read), the codes the robot's offered levels (`level_codes`). Which
+    rooms exist is the Hub's question: it has the map as well as the names,
+    and has already checked them.
     """
     name = command.name
     if name not in COMMANDS:
@@ -456,10 +456,6 @@ def command_request(
             raise RobotError("bad_request", "Choose at least one room.")
         if not 1 <= command.repeat <= 3:
             raise RobotError("bad_request", "Repeat must be 1, 2 or 3.")
-        unknown = [r for r in command.rooms if r not in rooms]
-        if unknown:
-            listed = ", ".join(str(r) for r in unknown)
-            raise RobotError("bad_request", f"Room {listed} is not on this robot's current map.")
         return RoborockCommand.APP_SEGMENT_CLEAN, [{"segments": list(command.rooms), "repeat": command.repeat}]
     if name == "set_fan":
         return RoborockCommand.SET_CUSTOM_MODE, [_level_code("suction", command.value, fan_codes)]
@@ -550,7 +546,6 @@ class _Robot:
     activity: str | None = None
     in_cleaning: int | None = None
     current_map: int | None = None
-    rooms: frozenset[int] = frozenset()
     fan_codes: dict[str, int] = field(default_factory=dict)
     water_codes: dict[str, int] = field(default_factory=dict)
     next_status: float = 0.0
@@ -619,7 +614,6 @@ class RoborockBackend(Backend):
         method, params = command_request(
             command,
             in_cleaning=robot.in_cleaning,
-            rooms=robot.rooms,
             fan_codes=robot.fan_codes,
             water_codes=robot.water_codes,
         )
@@ -836,7 +830,6 @@ class RoborockBackend(Backend):
             robot.next_rooms = loop.time() + ROOMS_RETRY_S
             return
         rooms = [Room(id=r.segment_id, name=r.name) for r in trait.rooms or ()]
-        robot.rooms = frozenset(r.id for r in rooms)
         robot.next_rooms = loop.time() + ROOMS_S
         self._sink_().robot_rooms(robot.info.id, rooms)
 

@@ -238,7 +238,6 @@ def _request(command: Command, in_cleaning: int | None = 0) -> tuple[RoborockCom
     return rb.command_request(
         command,
         in_cleaning=in_cleaning,
-        rooms=frozenset({16, 17, 18}),
         fan_codes=rb.level_codes(FAN),
         water_codes=rb.level_codes(WATER),
     )
@@ -277,7 +276,6 @@ def test_clean_rooms() -> None:
     "command",
     [
         Command("clean_rooms", rooms=()),
-        Command("clean_rooms", rooms=(16, 99)),
         Command("clean_rooms", rooms=(16,), repeat=0),
         Command("clean_rooms", rooms=(16,), repeat=4),
         Command("set_fan", value="custom"),
@@ -301,7 +299,7 @@ def test_set_levels() -> None:
 def test_set_water_on_a_robot_that_cannot_mop() -> None:
     with pytest.raises(RobotError) as err:
         rb.command_request(
-            Command("set_water", value="low"), in_cleaning=0, rooms=frozenset(), fan_codes={}, water_codes={}
+            Command("set_water", value="low"), in_cleaning=0, fan_codes={}, water_codes={}
         )
     assert err.value.code == "unsupported"
 
@@ -471,7 +469,6 @@ async def test_robot_not_connected_costs_nothing(tmp_path: pathlib.Path) -> None
 async def test_command_sends_and_schedules_follow_up_reads(tmp_path: pathlib.Path) -> None:
     backend, sink, robot, channel = _backend(tmp_path)
     channel.answer = ["ok"]
-    robot.rooms = frozenset({16})
     await backend.command("r1", Command("clean_rooms", rooms=(16,)))
     assert channel.sent == [(RoborockCommand.APP_SEGMENT_CLEAN, [{"segments": [16], "repeat": 1}])]
     now = asyncio.get_running_loop().time()
@@ -521,7 +518,7 @@ async def test_poller_reads_status_rooms_and_map_then_sleeps(tmp_path: pathlib.P
     assert [kind for kind, _ in sink.events] == ["status", "rooms", "map"]
     assert channel.sent == [(RoborockCommand.GET_STATUS, None)]
     assert map_channel.sent == [(RoborockCommand.GET_MAP_V1, None)]
-    assert robot.rooms == frozenset({16})
+    assert [(room.id, room.name) for room in dict(sink.events)["rooms"]] == [(16, "Room 16")]
     now = asyncio.get_running_loop().time()
     assert robot.next_map == pytest.approx(now + rb.MAP_IDLE_S, abs=2)
 
