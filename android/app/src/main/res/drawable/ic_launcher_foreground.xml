@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The web app's vacuum (icon.svg) on the adaptive icon's 108 dp canvas: its 64-unit artwork scaled
+     to the 72 dp that masks show, so the disc keeps its share of the icon. The dot and the bar are
+     holes, letting the teal background through; the same layer serves as the monochrome one. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#F5F6F5"
+        android:fillType="evenOdd"
+        android:pathData="M31.5,54a22.5,22.5 0 1,0 45,0a22.5,22.5 0 1,0 -45,0z M46.6875,46.125a7.3125,7.3125 0 1,0 14.625,0a7.3125,7.3125 0 1,0 -14.625,0z M44.4375,63.84375h19.125a1.96875,1.96875 0 0,1 0,3.9375h-19.125a1.96875,1.96875 0 0,1 0,-3.9375z" />
+</vector>

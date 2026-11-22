@@ -1,0 +1,1 @@
+{"error":{"code":"bad_request","message":"'command' is one of start, pause, resume, stop, dock, locate, clean_rooms, set_fan, set_water."}}

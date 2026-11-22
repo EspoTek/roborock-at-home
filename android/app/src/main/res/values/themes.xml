@@ -1,0 +1,6 @@
+<resources>
+    <!-- Only what shows before Compose draws: the window background. Everything else is in ui/theme. -->
+    <style name="Theme.RoborockAtHome" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>

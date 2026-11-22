@@ -1,0 +1,12 @@
+.gradle/
+.kotlin/
+build/
+.idea/
+*.iml
+local.properties
+# The release key and its passwords stay on the machine that signs.
+keystore.properties
+*.jks
+*.keystore
+*.apk
+*.aab

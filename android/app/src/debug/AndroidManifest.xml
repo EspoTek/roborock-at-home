@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- The kit gallery, debug builds only:
+             adb shell am start -n com.espotek.roborockathome/.GalleryActivity -->
+        <activity
+            android:name=".GalleryActivity"
+            android:exported="true"
+            android:label="Kit gallery"
+            android:windowSoftInputMode="adjustResize" />
+    </application>
+
+</manifest>
